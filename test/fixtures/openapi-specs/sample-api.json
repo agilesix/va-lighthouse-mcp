@@ -1,0 +1,231 @@
+{
+	"openapi": "3.0.0",
+	"info": {
+		"title": "Sample VA API",
+		"version": "1.0.0",
+		"description": "A sample VA Lighthouse API for testing",
+		"contact": {
+			"name": "VA API Support",
+			"email": "api@va.gov"
+		}
+	},
+	"servers": [
+		{
+			"url": "https://api.va.gov/services/sample/v1",
+			"description": "Production server"
+		}
+	],
+	"security": [
+		{
+			"apiKey": []
+		}
+	],
+	"tags": [
+		{
+			"name": "users",
+			"description": "User operations"
+		},
+		{
+			"name": "claims",
+			"description": "Claim operations"
+		}
+	],
+	"paths": {
+		"/users": {
+			"get": {
+				"operationId": "listUsers",
+				"summary": "List all users",
+				"description": "Returns a list of all users in the system",
+				"tags": ["users"],
+				"parameters": [
+					{
+						"name": "limit",
+						"in": "query",
+						"description": "Maximum number of results",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"minimum": 1,
+							"maximum": 100,
+							"default": 10
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserList"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "createUser",
+				"summary": "Create a new user",
+				"description": "Creates a new user in the system",
+				"tags": ["users"],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserInput"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "User created successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid input"
+					}
+				}
+			}
+		},
+		"/users/{userId}": {
+			"get": {
+				"operationId": "getUser",
+				"summary": "Get user by ID",
+				"description": "Returns a single user",
+				"tags": ["users"],
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found"
+					}
+				}
+			}
+		},
+		"/claims": {
+			"get": {
+				"operationId": "listClaims",
+				"summary": "List all claims",
+				"description": "Returns a list of all claims",
+				"tags": ["claims"],
+				"deprecated": true,
+				"responses": {
+					"200": {
+						"description": "Successful response"
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"apiKey": {
+				"type": "apiKey",
+				"name": "apikey",
+				"in": "header"
+			}
+		},
+		"schemas": {
+			"User": {
+				"type": "object",
+				"required": ["id", "email"],
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"description": "Unique user identifier"
+					},
+					"email": {
+						"type": "string",
+						"format": "email",
+						"description": "User email address"
+					},
+					"firstName": {
+						"type": "string",
+						"description": "User first name"
+					},
+					"lastName": {
+						"type": "string",
+						"description": "User last name"
+					},
+					"phone": {
+						"type": "string",
+						"format": "phone",
+						"description": "Phone number in XXX-XXX-XXXX format"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Account creation timestamp"
+					}
+				}
+			},
+			"UserInput": {
+				"type": "object",
+				"required": ["email"],
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email"
+					},
+					"firstName": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 50
+					},
+					"lastName": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 50
+					},
+					"phone": {
+						"type": "string",
+						"format": "phone"
+					}
+				}
+			},
+			"UserList": {
+				"type": "object",
+				"properties": {
+					"data": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/User"
+						}
+					},
+					"total": {
+						"type": "integer"
+					}
+				}
+			}
+		}
+	}
+}

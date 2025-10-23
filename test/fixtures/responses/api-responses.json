@@ -1,0 +1,42 @@
+{
+	"s3BucketListing": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListBucketResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Name>va-api-docs</Name>\n  <Prefix></Prefix>\n  <Marker></Marker>\n  <MaxKeys>1000</MaxKeys>\n  <IsTruncated>false</IsTruncated>\n  <Contents>\n    <Key>address-validation/metadata.json</Key>\n    <LastModified>2024-01-15T10:30:00.000Z</LastModified>\n    <Size>1234</Size>\n  </Contents>\n  <Contents>\n    <Key>address-validation/v1/openapi.json</Key>\n    <LastModified>2024-01-15T10:30:00.000Z</LastModified>\n    <Size>5678</Size>\n  </Contents>\n  <Contents>\n    <Key>benefits-claims/metadata.json</Key>\n    <LastModified>2024-01-15T10:30:00.000Z</LastModified>\n    <Size>1234</Size>\n  </Contents>\n  <Contents>\n    <Key>benefits-claims/v2/openapi.json</Key>\n    <LastModified>2024-01-15T10:30:00.000Z</LastModified>\n    <Size>9012</Size>\n  </Contents>\n  <Contents>\n    <Key>facilities/metadata.json</Key>\n    <LastModified>2024-01-15T10:30:00.000Z</LastModified>\n    <Size>1234</Size>\n  </Contents>\n</ListBucketResult>",
+	"apiMetadata": {
+		"meta": {
+			"display_name": "Address Validation API",
+			"display_description": "Validate and standardize mailing addresses",
+			"category": "Benefits",
+			"documentation": "https://developer.va.gov/explore/verification/docs/address_validation",
+			"contact": {
+				"name": "VA API Support",
+				"email": "api@va.gov"
+			},
+			"versions": [
+				{
+					"version": "v1",
+					"status": "Current Version",
+					"path": "/services/address-validation/v1/openapi.json",
+					"healthcheck": "https://api.va.gov/services/address-validation/v1/health",
+					"security": [
+						{
+							"apiKey": []
+						}
+					]
+				}
+			]
+		}
+	},
+	"healthCheckUp": {
+		"status": "UP",
+		"timestamp": "2024-01-15T10:30:00Z"
+	},
+	"healthCheckSuccess": {
+		"success": true,
+		"default": {
+			"success": true
+		}
+	},
+	"healthCheckDown": {
+		"status": "DOWN",
+		"error": "Service unavailable"
+	}
+}
