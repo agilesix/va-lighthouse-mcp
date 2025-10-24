@@ -1,0 +1,15 @@
+name: "Validate Request Payload - Success Case"
+description: "Verify validate_request_payload accepts valid request for GET endpoint (no body)"
+tool: "validate_request_payload"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  path: "/veterans/{veteranId}/claims/{id}"
+  method: "GET"
+
+assertions:
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "does not accept a request body"
+    caseInsensitive: true

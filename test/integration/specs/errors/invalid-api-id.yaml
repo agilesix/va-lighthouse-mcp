@@ -1,0 +1,11 @@
+name: "Error Handling - Invalid API ID"
+description: "Verify tools return proper error for non-existent API ID"
+tool: "get_api_info"
+arguments:
+  apiId: "non-existent-api-12345"
+
+assertions:
+  - type: "error"
+    messageContains: "not found"
+  - type: "response_time_ms"
+    max: 5000

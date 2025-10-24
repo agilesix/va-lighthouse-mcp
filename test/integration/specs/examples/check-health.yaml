@@ -1,0 +1,12 @@
+name: "Check API Health"
+description: "Verify that check_api_health returns health status for VA Benefits Claims API"
+tool: "check_api_health"
+arguments:
+  apiId: "benefits-claims"
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 10000
+  - type: "contains_text"
+    text: "health"

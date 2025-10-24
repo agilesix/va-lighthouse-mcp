@@ -1,0 +1,15 @@
+name: "Validate Response Payload - Failure Case"
+description: "Verify validate_response_payload rejects malformed response"
+tool: "validate_response_payload"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  path: "/veterans/{veteranId}/claims/{id}"
+  method: "GET"
+  statusCode: "200"
+  payload:
+    badStructure: "missing required fields"
+
+assertions:
+  - type: "response_time_ms"
+    max: 5000

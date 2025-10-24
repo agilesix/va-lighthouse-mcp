@@ -1,0 +1,14 @@
+name: "List Lighthouse APIs - Basic"
+description: "Verify that list_lighthouse_apis returns API list without deprecated APIs"
+tool: "list_lighthouse_apis"
+arguments:
+  includeDeprecated: false
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "Benefits"
+  - type: "contains_text"
+    text: "Health"

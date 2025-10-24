@@ -1,0 +1,21 @@
+name: "Validate Response Payload - Success Case"
+description: "Verify validate_response_payload accepts valid response structure"
+tool: "validate_response_payload"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  path: "/veterans/{veteranId}/claims/{id}"
+  method: "GET"
+  statusCode: "200"
+  payload:
+    data:
+      id: "123"
+      type: "claim"
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "valid"
+    caseInsensitive: true

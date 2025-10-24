@@ -1,0 +1,12 @@
+name: "Error Handling - Invalid Version"
+description: "Verify tools return proper error for non-existent API version"
+tool: "get_api_summary"
+arguments:
+  apiId: "benefits-claims"
+  version: "v999"
+
+assertions:
+  - type: "error"
+    messageContains: "404"
+  - type: "response_time_ms"
+    max: 5000

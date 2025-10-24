@@ -1,0 +1,13 @@
+name: "Error Handling - Missing Required Parameters"
+description: "Verify tools return proper error when required parameters are missing"
+tool: "get_endpoint_details"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  # Missing required 'path' and 'method' parameters
+
+assertions:
+  - type: "error"
+    messageContains: "Required"
+  - type: "response_time_ms"
+    max: 5000

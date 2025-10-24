@@ -1,0 +1,16 @@
+name: "Validate Request Payload - Failure Case"
+description: "Verify validate_request_payload rejects invalid request payload"
+tool: "validate_request_payload"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  path: "/veterans/{veteranId}/claims"
+  method: "POST"
+  payload:
+    invalidField: "this should fail"
+
+assertions:
+  - type: "error"
+    messageContains: "not found"
+  - type: "response_time_ms"
+    max: 5000

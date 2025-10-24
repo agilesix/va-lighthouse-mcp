@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { createMCPClient } from "../helpers/mcp-client.js";
+import { createMCPClient } from "./adapters/mcp-client.js";
 
 describe("MCP Protocol", () => {
 	let client: ReturnType<typeof createMCPClient>;

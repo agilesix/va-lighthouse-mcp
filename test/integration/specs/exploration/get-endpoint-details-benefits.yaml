@@ -1,0 +1,20 @@
+name: "Get Endpoint Details - Benefits Claims GET endpoint"
+description: "Verify get_endpoint_details returns detailed info for specific endpoint"
+tool: "get_endpoint_details"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  path: "/veterans/{veteranId}/claims/{id}"
+  method: "GET"
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "GET"
+  - type: "contains_text"
+    text: "veteranId"
+  - type: "contains_text"
+    text: "Parameters"
+    caseInsensitive: true

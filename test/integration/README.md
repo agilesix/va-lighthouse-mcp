@@ -1,289 +1,381 @@
-# Integration Tests
+# VA Lighthouse MCP Integration Tests
 
-Integration tests for the VA Lighthouse MCP Server. These tests verify end-to-end functionality by testing the running server via HTTP/MCP protocol.
+**Declarative Integration Testing for the VA Lighthouse MCP Server**
 
-## Overview
+This directory contains integration tests for the VA Lighthouse MCP server using a portable, agent-friendly test harness. Tests are written in simple YAML files without requiring code.
 
-The integration test suite validates all 13 MCP tools through actual server communication:
-
-- **Discovery Tools** (2): API listing and metadata retrieval
-- **Exploration Tools** (5): API summaries, endpoints, schemas, and search
-- **Validation Tools** (4): Payload validation with Zod (migrated from ajv)
-- **Utility Tools** (2): Health checks and version comparison
-
-## Prerequisites
-
-### 1. Start the Server
-
-Integration tests require a running MCP server:
-
-```bash
-npm run dev
-```
-
-The server must be available at `http://localhost:8788`.
-
-### 2. Verify Server is Running
-
-Check that the server responds:
-
-```bash
-curl http://localhost:8788/health
-```
-
-## Running Tests
-
-### Run All Integration Tests
-
-```bash
-npm run test:integration
-```
-
-### Run Specific Test File
-
-```bash
-npm run test:integration test/integration/tools/discovery.test.ts
-```
-
-### Watch Mode
-
-Run tests in watch mode (auto-rerun on changes):
-
-```bash
-npm run test:integration:watch
-```
-
-### Run Both Unit and Integration Tests
-
-```bash
-npm run test:all
-```
-
-## Test Structure
-
-```
-test/integration/
-├── tools/
-│   ├── discovery.test.ts       # 2 discovery tools
-│   ├── exploration.test.ts     # 5 exploration tools
-│   ├── validation.test.ts      # 4 validation tools (Zod-based)
-│   └── utilities.test.ts       # 2 utility tools
-├── mcp-protocol.test.ts        # MCP protocol fundamentals
-├── comprehensive.test.ts       # All 13 tools in sequence
-└── README.md                   # This file
-```
-
-## Test Organization
-
-Each test file follows this structure:
-
-```typescript
-import { describe, it, expect, beforeAll } from "vitest";
-import { createMCPClient } from "../../helpers/mcp-client.js";
-
-const client = createMCPClient();
-
-describe("Tool Category", () => {
-	beforeAll(async () => {
-		// Check server and initialize session
-		const isAvailable = await client.isServerAvailable();
-		if (!isAvailable) {
-			throw new Error("MCP server not running");
-		}
-		await client.initialize();
-	});
-
-	describe("specific_tool", () => {
-		it("should do something", async () => {
-			const result = await client.callTool("tool_name", { args });
-			const text = client.getTextContent(result);
-			expect(text).toContain("expected content");
-		});
-	});
-});
-```
-
-## MCP Client Helper
-
-The `MCPClient` helper class (`test/helpers/mcp-client.ts`) provides:
-
-- **Connection management**: Automatic session handling
-- **Request/Response**: JSON-RPC 2.0 protocol
-- **SSE parsing**: Server-Sent Events format handling
-- **Tool calling**: Simplified tool invocation
-- **Error handling**: Graceful error management
-
-### Example Usage
-
-```typescript
-import { createMCPClient } from "../helpers/mcp-client.js";
-
-const client = createMCPClient();
-
-// Initialize session
-await client.initialize();
-
-// Call a tool
-const result = await client.callTool("list_lighthouse_apis", {
-	includeDeprecated: false,
-});
-
-// Get text content
-const text = client.getTextContent(result);
-console.log(text);
-```
-
-## Configuration
-
-Integration tests use a separate Vitest configuration:
-
-**vitest.integration.config.ts**:
-- Node.js environment (not Workers pool)
-- 30-second test timeout (for network calls)
-- Thread pool for parallelization
-- v8 coverage provider
-
-## Debugging
-
-### View Detailed Output
-
-```bash
-npm run test:integration -- --reporter=verbose
-```
-
-### Run Single Test
-
-```bash
-npm run test:integration -- -t "should return a list of APIs"
-```
-
-### Save Test Logs
-
-Test output can be saved to `test/integration-logs/`:
-
-```bash
-npm run test:integration 2>&1 | tee test/integration-logs/test-run-$(date +%Y%m%d-%H%M%S).log
-```
-
-## Common Issues
-
-### ❌ "MCP server is not running"
-
-**Solution**: Start the server in another terminal:
-```bash
-npm run dev
-```
-
-### ❌ "Connection refused"
-
-**Solution**: Verify server is on port 8788:
-```bash
-curl http://localhost:8788/health
-```
-
-### ❌ "Timeout"
-
-**Solution**: Network calls may be slow. The timeout is set to 30 seconds. Check your internet connection or VA API availability.
-
-### ❌ Tests fail sporadically
-
-**Solution**:
-- Restart the server: `npm run dev`
-- Clear Wrangler cache: `rm -rf .wrangler/`
-- Check VA API health: The tests call real VA APIs which may be temporarily unavailable
-
-## Writing New Tests
-
-### 1. Choose the Right File
-
-- **Tool-specific tests**: Add to appropriate `tools/*.test.ts` file
-- **Protocol tests**: Add to `mcp-protocol.test.ts`
-- **End-to-end tests**: Add to `comprehensive.test.ts`
-
-### 2. Follow the Pattern
-
-```typescript
-describe("your_tool_name", () => {
-	it("should handle basic usage", async () => {
-		const result = await client.callTool("your_tool_name", {
-			requiredParam: "value",
-		});
-
-		const text = client.getTextContent(result);
-
-		// Assert expected behavior
-		expect(text).toContain("expected output");
-		expect(text.length).toBeGreaterThan(0);
-	});
-
-	it("should handle error cases", async () => {
-		try {
-			await client.callTool("your_tool_name", {
-				invalidParam: "bad value",
-			});
-		} catch (error) {
-			expect(error).toBeDefined();
-		}
-	});
-});
-```
-
-### 3. Test Coverage Checklist
-
-- ✅ **Happy path**: Valid inputs produce expected outputs
-- ✅ **Edge cases**: Boundary conditions, empty inputs, nulls
-- ✅ **Error handling**: Invalid inputs, missing required params
-- ✅ **Data validation**: Check structure and content of responses
-- ✅ **Performance**: Reasonable timeouts for network operations
-
-## Test Statistics
-
-- **Total Test Files**: 6
-- **Total Tests**: ~45-50 integration tests
-- **Coverage**: All 13 MCP tools
-- **Test Types**: Tool functionality, protocol, error handling, comprehensive
-
-## Differences from Unit Tests
-
-| Aspect | Unit Tests | Integration Tests |
-|--------|------------|-------------------|
-| **Scope** | Individual functions | End-to-end workflows |
-| **Runtime** | Workers pool (in-memory) | Node.js (HTTP) |
-| **Speed** | Fast (~4 seconds) | Slower (~10-30 seconds) |
-| **Server** | Not needed | Must be running |
-| **Dependencies** | Mocked | Real VA APIs |
-| **Config** | `vitest.config.ts` | `vitest.integration.config.ts` |
-
-## Related Documentation
-
-- **Unit Tests**: See `test/unit/` for isolated function tests
-- **Test Summary**: See `TEST_IMPLEMENTATION_SUMMARY.md` for complete test overview
-- **MCP Protocol**: See MCP SDK documentation
-- **VA Lighthouse APIs**: See https://developer.va.gov
-
-## Migrated from JavaScript
-
-These tests were converted from the original JavaScript integration tests (`tests/` directory) to TypeScript with Vitest. The conversion provides:
-
-- ✅ Type safety with TypeScript
-- ✅ Better IDE support
-- ✅ Consistent test framework (Vitest)
-- ✅ Improved assertions and error messages
-- ✅ Shared test infrastructure
-- ✅ Zod validation testing (migrated from ajv)
-
-## Contributing
-
-When adding new tests:
-
-1. Ensure server is running
-2. Follow existing test patterns
-3. Add descriptive test names
-4. Include error handling tests
-5. Run tests before committing: `npm run test:integration`
+> 📘 **For detailed harness documentation**, see [harness/README.md](./harness/README.md)
 
 ---
 
-**Last Updated**: 2025-10-23
-**Test Framework**: Vitest 3.2.4
-**Validation Library**: Zod 3.25.76 (migrated from ajv)
+## Quick Start
+
+### Prerequisites
+
+Before running tests, ensure the MCP server is running:
+
+```bash
+# Start the server
+npm run dev
+
+# Verify it's accessible (in another terminal)
+curl http://localhost:8788/mcp
+```
+
+### 5-Step Quick Start
+
+**1. List Available Tests**
+```bash
+npm run integration:list
+```
+
+**2. Run All Tests**
+```bash
+npm run integration:run
+```
+
+**3. Generate a New Test**
+```bash
+npm run integration:generate -- list_lighthouse_apis \
+  --args '{"includeDeprecated": false}' \
+  --output specs/my-test.yaml
+```
+
+**4. Run Specific Test**
+```bash
+npm run integration:run -- specs/my-test.yaml
+```
+
+**5. Get Machine-Readable Results**
+```bash
+npm run integration:run -- --json
+```
+
+---
+
+## Test Specification Format
+
+Tests are defined in YAML/JSON files. Here's a quick example:
+
+```yaml
+name: "Test list_lighthouse_apis"
+tool: "list_lighthouse_apis"
+arguments:
+  includeDeprecated: false
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "Benefits"
+```
+
+> 📘 **Complete specification reference:** See [harness/README.md](./harness/README.md#test-specification-format) for:
+> - Test specification structure
+> - All 9 assertion types (success, error, contains_text, json_path, regex_match, etc.)
+> - Advanced features (skip, only)
+> - JSON output format
+
+---
+
+## CLI Commands
+
+### Run Tests
+
+```bash
+# Run all tests
+npm run integration:run
+
+# Run specific test file
+npm run integration:run -- specs/my-test.yaml
+
+# Run tests matching pattern
+npm run integration:run -- specs/validation-*.yaml
+
+# Get JSON output (for parsing)
+npm run integration:run -- --json
+
+# Get simple pass/fail message
+npm run integration:run -- --simple
+
+# Verbose output
+npm run integration:run -- --verbose
+```
+
+### List Tests
+
+```bash
+npm run integration:list
+```
+
+### Generate Test Template
+
+```bash
+# Basic generation
+npm run integration:generate -- <tool-name>
+
+# With arguments
+npm run integration:generate -- list_lighthouse_apis \
+  --args '{"includeDeprecated": false}'
+
+# With description
+npm run integration:generate -- get_api_info \
+  --description "Test Benefits API metadata"
+
+# Custom output location
+npm run integration:generate -- check_api_health \
+  --output specs/health-check.yaml
+
+# Print to stdout instead of file
+npm run integration:generate -- list_api_endpoints \
+  --stdout
+```
+
+---
+
+## Directory Structure
+
+```
+test/integration/
+├── harness/                 # Portable test harness (→ future npm package)
+│   ├── README.md           # Harness documentation
+│   ├── types/              # TypeScript interfaces
+│   ├── assertions/         # Assertion implementations
+│   ├── reporters/          # Output formatters
+│   ├── validation/         # Zod schemas
+│   ├── runner.ts           # Test execution engine
+│   ├── spec-loader.ts      # YAML/JSON loader
+│   └── __tests__/          # Harness unit tests (88 tests)
+│
+├── adapters/                # VA Lighthouse integration
+│   ├── mcp-client.ts       # MCP client (official SDK)
+│   └── client-adapter.ts   # Implements IMCPTestClient
+│
+├── specs/                   # Test specifications
+│   ├── discovery/          # Discovery tool tests
+│   ├── exploration/        # Exploration tool tests
+│   ├── validation/         # Validation tool tests
+│   ├── utilities/          # Utility tool tests
+│   ├── errors/             # Error handling tests
+│   └── examples/           # Example tests
+│
+├── config.ts                # Test configuration
+├── cli.ts                   # CLI entry point
+├── tools/                   # Legacy Vitest tests (deprecated)
+└── README.md               # This file
+```
+
+### Architecture
+
+**Portable Harness** (`harness/`)
+- Generic, reusable test framework
+- No VA Lighthouse dependencies
+- Can be extracted to npm: `@your-org/mcp-test-harness`
+- See [harness/README.md](./harness/README.md) for details
+
+**VA Lighthouse Integration** (`adapters/`, `config.ts`, `cli.ts`)
+- MCP client using official SDK
+- Server URL configuration
+- CLI for running tests
+
+**Test Specifications** (`specs/`)
+- Declarative YAML/JSON tests
+- Organized by tool category
+- 17 tests covering all 13 VA Lighthouse MCP tools
+
+---
+
+## Agent Workflow
+
+### Scenario: Adding a New Feature
+
+1. **Write the feature code**
+   - Make changes to your MCP server tool
+
+2. **Generate test template**
+   ```bash
+   npm run integration:generate -- my_new_tool \
+     --args '{"param": "value"}' \
+     --output specs/utilities/my-new-tool.yaml
+   ```
+
+3. **Edit the test spec**
+   - Open `specs/utilities/my-new-tool.yaml`
+   - Add specific assertions for your use case
+   - Reference [harness/README.md](./harness/README.md#assertion-types) for assertion types
+
+4. **Run the test**
+   ```bash
+   npm run integration:run -- specs/utilities/my-new-tool.yaml --json
+   ```
+
+5. **Read the results**
+   ```json
+   {
+     "summary": {
+       "passed": 1,
+       "failed": 0,
+       "total": 1
+     }
+   }
+   ```
+
+6. **If test passes, commit it**
+   ```bash
+   git add specs/utilities/my-new-tool.yaml
+   git commit -m "Add integration test for my_new_tool"
+   ```
+
+### For AI Agents
+
+This test framework is optimized for AI agent usage:
+
+**✅ DO:**
+- Generate tests using `npm run integration:generate`
+- Read results with `--json` flag for parsing
+- Create tests in YAML format (easier than JSON)
+- Use descriptive test names and descriptions
+- Run specific tests for fast feedback
+
+**❌ DON'T:**
+- Write tests in TypeScript/JavaScript (use YAML)
+- Modify harness code (it's portable and stable)
+- Hard-code server URLs (use config.ts or env vars)
+- Skip writing assertions (they catch regressions)
+
+**Example Agent Commands:**
+```bash
+# Generate test
+npm run integration:generate -- tool_name --args '{}' --stdout > temp-test.yaml
+
+# Run and parse results
+npm run integration:run -- temp-test.yaml --json | jq '.summary.passed'
+
+# Check if all tests pass
+npm run integration:run -- --json | jq -e '.summary.failed == 0'
+```
+
+---
+
+## Examples
+
+See `specs/examples/` for complete working examples:
+
+- **`list-apis-basic.yaml`** - Basic tool testing with assertions
+- **`list-apis-with-deprecated.yaml`** - Testing with different arguments
+- **`check-health.yaml`** - Using regex assertions for health checks
+
+Each category folder contains additional examples:
+- `specs/discovery/` - API discovery tool tests
+- `specs/exploration/` - API exploration tool tests
+- `specs/validation/` - Payload validation tests
+- `specs/utilities/` - Utility tool tests
+- `specs/errors/` - Error handling tests
+
+---
+
+## Troubleshooting
+
+### "No test specs found"
+- Ensure you have `.yaml` or `.json` files in `test/integration/specs/`
+- Check file extensions are correct
+- Run `npm run integration:list` to see discovered tests
+
+### "Error loading test spec"
+- Verify YAML syntax is valid (use a YAML validator)
+- Ensure all required fields are present: `name`, `tool`, `arguments`, `assertions`
+- Check assertion types are spelled correctly
+- See [harness/README.md](./harness/README.md#assertion-types) for valid types
+
+### "Server not running"
+- Start the server: `npm run dev`
+- Verify server URL in `config.ts` matches your setup
+- Check server accessibility: `curl http://localhost:8788/mcp`
+- Set `MCP_SERVER_URL` environment variable if needed
+
+### Tests timeout
+- Increase timeout in `config.ts` (default timeout)
+- Add `timeout: 30000` to specific test spec (per-test override)
+- Check server performance (may be slow on first run)
+- Verify network connectivity
+
+### Tests fail unexpectedly
+- Check server logs for errors
+- Run with `--verbose` flag for detailed output
+- Verify test assertions match actual tool output
+- Compare with example tests in `specs/examples/`
+
+---
+
+## Configuration
+
+Edit `config.ts` to customize:
+
+```typescript
+export const config = {
+  serverUrl: process.env.MCP_SERVER_URL || 'http://localhost:8788/mcp',
+  defaultTimeout: 30000,  // 30 seconds
+  specsDir: path.join(__dirname, 'specs'),
+};
+```
+
+### Environment Variables
+
+- `MCP_SERVER_URL` - Override server URL
+- Example: `MCP_SERVER_URL=http://localhost:9000/mcp npm run integration:run`
+
+---
+
+## Test Coverage
+
+**Current Status: 95% success rate (19/20 tests passing)**
+
+**Coverage by Category:**
+- ✅ Discovery (3 tests) - list_lighthouse_apis, get_api_info
+- ✅ Exploration (3 tests) - get_api_summary, list_api_endpoints, get_endpoint_details
+- ✅ Validation (5 tests) - generate_example_payload, validate payloads
+- ✅ Utilities (3 tests) - check_api_health, compare_api_versions, search_api_operations
+- ✅ Errors (3 tests) - Invalid inputs, missing params, error messages
+
+**All 13 VA Lighthouse MCP tools have integration test coverage.**
+
+---
+
+## Running Harness Unit Tests
+
+The test harness itself has comprehensive unit tests:
+
+```bash
+# Run harness unit tests (fast, no server required)
+npm run test:harness
+
+# Run all tests (unit + harness + integration)
+npm run test:all
+```
+
+> 📘 See [harness/README.md](./harness/README.md#unit-tests) for harness test details
+
+---
+
+## Next Steps
+
+1. **Explore examples**: `ls test/integration/specs/examples/`
+2. **Run your first test**: `npm run integration:run -- specs/examples/list-apis-basic.yaml`
+3. **Generate a new test**: `npm run integration:generate -- list_lighthouse_apis`
+4. **Customize and iterate**: Edit the generated YAML file and re-run
+
+---
+
+## Support
+
+For issues or questions:
+- Check example tests in `specs/examples/`
+- Review [harness/README.md](./harness/README.md) for assertion types
+- Review this README for CLI commands
+- Check test output for specific error messages
+- Run with `--verbose` for detailed output
+
+---
+
+**Built for Agents, by Agents** 🤖

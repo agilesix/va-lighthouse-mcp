@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeAll } from "vitest";
-import { createMCPClient } from "../helpers/mcp-client.js";
+import { createMCPClient } from "./adapters/mcp-client.js";
 
 const client = createMCPClient();
 

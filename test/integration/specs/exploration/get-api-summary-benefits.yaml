@@ -1,0 +1,18 @@
+name: "Get API Summary - Benefits Claims v2"
+description: "Verify get_api_summary returns OpenAPI summary for Benefits Claims v2"
+tool: "get_api_summary"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "API"
+    caseInsensitive: true
+  - type: "contains_text"
+    text: "v2"
+  - type: "contains_text"
+    text: "Benefits Claims"

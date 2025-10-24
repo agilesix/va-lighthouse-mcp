@@ -1,0 +1,18 @@
+name: "Compare API Versions - Benefits Claims v1 vs v2"
+description: "Verify compare_api_versions highlights differences between versions"
+tool: "compare_api_versions"
+arguments:
+  apiId: "benefits-claims"
+  version1: "v1"
+  version2: "v2"
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "Comparison"
+    caseInsensitive: true
+  - type: "regex_match"
+    pattern: "v1.*v2|v2.*v1"
+    flags: "i"

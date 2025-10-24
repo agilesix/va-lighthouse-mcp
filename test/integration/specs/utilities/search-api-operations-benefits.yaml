@@ -1,0 +1,20 @@
+name: "Search API Operations - Benefits Claims 'claim' query"
+description: "Verify search_api_operations finds relevant endpoints by keyword"
+tool: "search_api_operations"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  query: "claim"
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "Found"
+  - type: "contains_text"
+    text: "claim"
+    caseInsensitive: true
+  - type: "regex_match"
+    pattern: "\\d+ (result|match)"
+    flags: "i"

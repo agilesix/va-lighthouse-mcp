@@ -1,0 +1,13 @@
+name: "List Lighthouse APIs - With Deprecated"
+description: "Verify that list_lighthouse_apis includes deprecated APIs when requested"
+tool: "list_lighthouse_apis"
+arguments:
+  includeDeprecated: true
+
+assertions:
+  - type: "success"
+  - type: "response_time_ms"
+    max: 5000
+  - type: "contains_text"
+    text: "APIs"
+    caseInsensitive: true
