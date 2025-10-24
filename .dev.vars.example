@@ -1,0 +1,32 @@
+# Example Environment Variables for VA Lighthouse MCP Server
+# Copy this file to .dev.vars for local development (ignored by git)
+#
+# Usage:
+#   cp .dev.vars.example .dev.vars
+#   # Edit .dev.vars with your actual values
+#
+# Note: .dev.vars is automatically loaded by Wrangler in development mode
+
+# VA Lighthouse API Configuration (if needed in the future)
+# VA_API_KEY=your-api-key-here
+# VA_API_BASE_URL=https://api.va.gov
+
+# Logging Configuration
+# LOG_LEVEL=debug
+# LOG_FORMAT=json
+
+# Cache Configuration (currently hardcoded, but could be configurable)
+# CACHE_MAX_SIZE=50
+# CACHE_TTL_SECONDS=3600
+
+# Development Settings
+# DEV_MODE=true
+# ENABLE_DEBUG_LOGGING=false
+
+# Rate Limiting (if implemented in the future)
+# RATE_LIMIT_REQUESTS_PER_MINUTE=100
+# RATE_LIMIT_ENABLED=true
+
+# Currently, this MCP server does not require any environment variables to run.
+# All configuration is in wrangler.jsonc and source code.
+# This file is provided as a template for future extensibility.

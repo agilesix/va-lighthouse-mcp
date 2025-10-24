@@ -1,0 +1,55 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "command": "bash",
+        "args": [
+          "-c",
+          "if [ -n \"$CLAUDE_CODE_REMOTE\" ]; then echo '🌐 Remote Claude Code session detected'; echo '📦 Installing dependencies...'; npm install && echo '✅ Dependencies installed successfully'; else echo '💻 Local session - dependencies managed manually'; fi"
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run test:unit:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(npm run test:integration:*)",
+      "Bash(npm run test:harness:*)",
+      "Bash(npm run test:all:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run format:*)",
+      "Bash(npm run lint:fix:*)",
+      "Bash(npm test:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx vitest:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(ps:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(check-tools:*)",
+      "WebFetch(domain:api.va.gov)",
+      "WebFetch(domain:developer.va.gov)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:modelcontextprotocol.io)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": [
+      "Bash(npm run deploy:*)",
+      "Bash(npx wrangler:*)",
+      "Bash(wrangler:*)",
+      "Bash(git push:*)",
+      "Bash(rm -rf:*)"
+    ]
+  }
+}

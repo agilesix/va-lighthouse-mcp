@@ -19,6 +19,168 @@ cd va-lighthouse-mcp
 npm install
 ```
 
+## Using with Claude Code Web
+
+This repository is configured for autonomous agent operation in Claude Code web (remote environments).
+
+### Configuration Files
+
+- **`CLAUDE.md`**: Primary agent context with project overview, commands, and quick reference
+- **`AGENTS.md`**: Detailed agent instructions for development workflows, testing, and code quality
+- **`.claude/settings.json`**: Automated environment setup with SessionStart hooks and permissions
+
+### Automatic Environment Setup
+
+When starting a Claude Code web session, the environment automatically:
+
+1. **Detects remote environment** via `CLAUDE_CODE_REMOTE` environment variable
+2. **Installs dependencies** by running `npm install` through SessionStart hook
+3. **Provides comprehensive context** to agents from CLAUDE.md and AGENTS.md
+4. **Configures permissions** for development tasks (testing, formatting, linting)
+
+### Remote Environment Characteristics
+
+**Automatic Setup**:
+```bash
+# SessionStart hook runs automatically:
+if [ -n "$CLAUDE_CODE_REMOTE" ]; then
+  echo '🌐 Remote Claude Code session detected'
+  npm install
+fi
+```
+
+**Network Access**:
+- Limited to allowlisted domains:
+  - `api.va.gov` - VA Lighthouse APIs
+  - `developer.va.gov` - VA API documentation
+  - `github.com` - Source control
+  - `npmjs.com`, `registry.npmjs.org` - Package management
+  - Common development tool domains
+
+**Limitations**:
+- No Cloudflare Workers deployment (`npm run deploy` disabled in remote)
+- Temporary VMs (session-based, no persistent state)
+- GitHub proxy for git operations
+
+### Local Development Settings
+
+For local development, use `.claude/settings.local.json` (already exists, not tracked in git):
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(npm run test:*)",
+      // ... local-specific permissions
+    ]
+  }
+}
+```
+
+**Key Difference**:
+- `.claude/settings.json` - Tracked in git, used in remote Claude Code web sessions
+- `.claude/settings.local.json` - Not tracked (.gitignore), used for local development
+
+### Agent Feedback Loops
+
+Claude Code web agents have multiple feedback mechanisms:
+
+**Fast Feedback** (seconds):
+- `npm run type-check` - TypeScript validation
+- `npm run lint:fix` - Linting and auto-fix
+- `npm run format` - Code formatting
+- `npm run test:unit` - Unit tests (226 tests)
+
+**Comprehensive Feedback** (minutes):
+- `npm run test:all` - All tests (314 tests, includes integration)
+- `npm run test:coverage` - Coverage report (94% target)
+
+**Pre-commit Validation**:
+```bash
+npm run type-check && npm run format && npm run lint:fix && npm run test:all
+```
+
+### Documentation for Agents
+
+Agents access comprehensive documentation:
+
+- **CLAUDE.md**: Quick start, common commands, testing workflows
+- **AGENTS.md**: Environment setup, code quality standards, git workflow, troubleshooting
+- **docs/TOOLS.md**: Complete MCP tools reference (1,100 lines)
+- **docs/DEVELOPMENT.md**: This file - development guide
+- **docs/DEPLOYMENT.md**: Cloudflare Workers deployment (local only)
+
+### Testing in Remote Sessions
+
+**Unit Tests**: Work normally in remote sessions
+```bash
+npm run test:unit        # Fast, no server required
+npm run test:coverage    # Includes coverage report
+```
+
+**Integration Tests**: Require dev server running
+```bash
+# Terminal 1 (or background process)
+npm run dev
+
+# Terminal 2
+npm run test:integration
+```
+
+**Important**: Integration tests connect to `http://localhost:8788/sse` and will fail if the server isn't running.
+
+### Example Agent Workflow
+
+Typical workflow for autonomous agent in Claude Code web:
+
+1. **Session starts**: SessionStart hook installs dependencies automatically
+2. **Agent reads context**: Reviews CLAUDE.md and AGENTS.md for project understanding
+3. **Makes changes**: Modifies code following established patterns
+4. **Validates changes**:
+   ```bash
+   npm run type-check   # TypeScript validation
+   npm run format       # Format code
+   npm run test:unit    # Run tests
+   ```
+5. **Comprehensive check**:
+   ```bash
+   npm run test:all     # All tests must pass
+   ```
+6. **Commits**: Uses conventional commits format with Claude attribution
+
+### Permissions Model
+
+The `.claude/settings.json` file defines what agents can do:
+
+**Allowed** (no confirmation needed):
+- Development commands: `npm run dev`, `npm run test:*`
+- Code quality: `npm run format`, `npm run lint:fix`
+- Type checking: `npm run type-check`
+- Web fetching: VA APIs, GitHub, npm registry
+- Process management: `lsof`, `ps`, `kill` (for managing dev server)
+
+**Ask for confirmation**:
+- Deployment: `npm run deploy`, `wrangler` commands
+- Git push: `git push` operations
+- Destructive: `rm -rf` operations
+
+**Denied**:
+- Currently none (rely on "ask" for dangerous operations)
+
+### Transitioning Between Web and Local
+
+**Web to Local**:
+1. Start task in Claude Code web
+2. Click "Open in CLI" in the web interface
+3. Paste provided command in local repository
+4. Local changes are stashed, remote session loads
+5. Continue development locally
+
+**Local to Web**:
+- Not directly supported (start new web session)
+- Git commits are shared across both environments
+
 ## Development Server
 
 Start the development server with hot reloading:

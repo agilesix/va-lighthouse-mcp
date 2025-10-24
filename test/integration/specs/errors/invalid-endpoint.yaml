@@ -1,0 +1,14 @@
+name: "Error Handling - Invalid Endpoint"
+description: "Verify tools return proper error for non-existent endpoint"
+tool: "get_endpoint_details"
+arguments:
+  apiId: "benefits-claims"
+  version: "v2"
+  path: "/non-existent-endpoint"
+  method: "GET"
+
+assertions:
+  - type: "error"
+    messageContains: "not found"
+  - type: "response_time_ms"
+    max: 5000

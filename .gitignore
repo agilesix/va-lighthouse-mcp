@@ -187,3 +187,6 @@ test/integration-logs/*.xml
 *.bak
 *.backup
 *~
+
+# Claude Code local settings (settings.json is tracked for remote environments)
+.claude/settings.local.json
