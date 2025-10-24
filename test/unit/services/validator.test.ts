@@ -683,4 +683,240 @@ describe("Validator", () => {
 			expect(enumError?.expected).toContain("compensation");
 		});
 	});
+
+	describe("Pattern/Regex Validation", () => {
+		it("should validate pattern constraints on strings", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					ssn: {
+						type: "string",
+						pattern: "^\\d{3}-\\d{2}-\\d{4}$",
+					},
+				},
+				required: ["ssn"],
+			};
+
+			const validPayload = { ssn: "123-45-6789" };
+			const result = Validator.validate(validPayload, schema);
+			expect(result.valid).toBe(true);
+		});
+
+		it("should detect pattern validation failures", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					ssn: {
+						type: "string",
+						pattern: "^\\d{3}-\\d{2}-\\d{4}$",
+					},
+				},
+				required: ["ssn"],
+			};
+
+			const invalidPayload = { ssn: "123456789" }; // Missing hyphens
+			const result = Validator.validate(invalidPayload, schema);
+
+			expect(result.valid).toBe(false);
+			expect(result.errors).toHaveLength(1);
+			expect(result.errors[0].type).toBe("pattern");
+		});
+
+		it("should provide fix suggestions for pattern errors", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					phone: {
+						type: "string",
+						pattern: "^\\d{3}-\\d{3}-\\d{4}$",
+					},
+				},
+				required: ["phone"],
+			};
+
+			const invalidPayload = { phone: "5551234567" };
+			const result = Validator.validate(invalidPayload, schema);
+
+			expect(result.valid).toBe(false);
+			const patternError = result.errors.find((e) => e.type === "pattern");
+			expect(patternError).toBeDefined();
+			expect(patternError?.fixSuggestion).toContain("XXX-XXX-XXXX");
+		});
+
+		it("should handle custom pattern validation messages", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					code: {
+						type: "string",
+						pattern: "^[A-Z]{3}-\\d{4}$",
+					},
+				},
+				required: ["code"],
+			};
+
+			const invalidPayload = { code: "abc-1234" }; // Lowercase instead of uppercase
+			const result = Validator.validate(invalidPayload, schema);
+
+			expect(result.valid).toBe(false);
+			expect(result.errors[0].type).toBe("pattern");
+			expect(result.errors[0].message).toContain("pattern");
+		});
+	});
+
+	describe("getFieldSchema Edge Cases", () => {
+		it("should handle array item access in getFieldSchema", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					items: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								id: { type: "integer" },
+							},
+							required: ["id"],
+						},
+					},
+				},
+				required: ["items"],
+			};
+
+			const invalidPayload = {
+				items: [{ id: "not-a-number" }], // Should be integer
+			};
+
+			const result = Validator.validate(invalidPayload, schema);
+
+			expect(result.valid).toBe(false);
+			const typeError = result.errors.find((e) => e.field === "items.0.id");
+			expect(typeError).toBeDefined();
+			expect(typeError?.expected).toBe("integer");
+		});
+
+		it("should handle deeply nested array access", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					data: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								values: {
+									type: "array",
+									items: { type: "string" },
+								},
+							},
+						},
+					},
+				},
+			};
+
+			const invalidPayload = {
+				data: [{ values: [123] }], // Should be string
+			};
+
+			const result = Validator.validate(invalidPayload, schema);
+
+			expect(result.valid).toBe(false);
+			expect(result.errors[0].field).toBe("data.0.values.0");
+		});
+
+		it("should handle invalid path segments gracefully", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					user: {
+						type: "object",
+						properties: {
+							name: { type: "string" },
+						},
+					},
+				},
+			};
+
+			const invalidPayload = {
+				user: {
+					nonexistent: 123, // This field doesn't exist in schema
+				},
+			};
+
+			// Should validate without crashing even with fields not in schema
+			const result = Validator.validate(invalidPayload, schema);
+			expect(result).toBeDefined();
+		});
+
+		it("should handle accessing non-existent nested properties", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					data: {
+						type: "object",
+						properties: {
+							value: { type: "string" },
+						},
+					},
+				},
+			};
+
+			const invalidPayload = {
+				data: {
+					nested: {
+						deep: "value",
+					},
+				},
+			};
+
+			// Schema doesn't define nested.deep, should handle gracefully
+			const result = Validator.validate(invalidPayload, schema);
+			expect(result).toBeDefined();
+		});
+
+		it("should handle array paths with missing items schema", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					list: {
+						type: "array",
+						// Missing items schema - edge case
+					},
+				},
+			};
+
+			const payload = {
+				list: [1, 2, 3],
+			};
+
+			const result = Validator.validate(payload, schema);
+			expect(result).toBeDefined();
+		});
+
+		it("should handle validation errors on undefined schema paths", () => {
+			// Create a schema that will pass JSON Schema validation
+			// but Zod will generate errors on paths not in the schema
+			const schema = {
+				type: "object",
+				properties: {
+					data: {
+						type: "string",
+					},
+				},
+				required: ["data"],
+				additionalProperties: false,
+			};
+
+			// This should generate an error for "extra" field which isn't in schema
+			const payload = {
+				data: "valid",
+				extra: "not allowed",
+			};
+
+			const result = Validator.validate(payload, schema);
+
+			// getFieldSchema will return undefined for "extra" since it's not in schema
+			expect(result).toBeDefined();
+		});
+	});
 });

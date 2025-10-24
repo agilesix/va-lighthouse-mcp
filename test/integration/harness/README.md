@@ -391,9 +391,6 @@ npm run test:harness
 
 # Run in watch mode
 npm run test:harness:watch
-
-# Run with coverage
-npm run test:harness:coverage
 ```
 
 ### Test Coverage

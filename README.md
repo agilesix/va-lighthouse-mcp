@@ -71,8 +71,15 @@ Server runs at `http://localhost:8788/sse`
 
 **Unit Tests** (124 tests)
 ```bash
-npm run test:unit
+npm run test:unit        # Uses Cloudflare Workers pool
 ```
+
+**Test Coverage**
+```bash
+npm run test:coverage:unit   # Generate coverage report
+npm run test:coverage:open   # Open coverage HTML report
+```
+Coverage reports are generated in `coverage/` directory with HTML, JSON, and text output.
 
 **Integration Tests** (75 tests)
 ```bash

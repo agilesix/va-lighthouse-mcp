@@ -16,14 +16,14 @@
 		"test:unit": "vitest run test/unit",
 		"test:harness": "vitest run --config test/integration/harness/__tests__/vitest.config.ts",
 		"test:harness:watch": "vitest watch --config test/integration/harness/__tests__/vitest.config.ts",
-		"test:harness:coverage": "vitest run --coverage --config test/integration/harness/__tests__/vitest.config.ts",
 		"integration:run": "tsx test/integration/cli.ts run",
 		"integration:list": "tsx test/integration/cli.ts list",
 		"integration:generate": "tsx test/integration/cli.ts generate",
 		"test:integration": "npm run integration:run",
 		"test:all": "npm run test:unit && npm run test:harness && npm run test:integration",
-		"test:coverage": "vitest run --coverage",
-		"test:coverage:unit": "vitest run --coverage test/unit"
+		"test:coverage": "vitest run --coverage --config vitest.unit.config.ts",
+		"test:coverage:unit": "vitest run --coverage --config vitest.unit.config.ts",
+		"test:coverage:open": "open coverage/index.html"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "1.19.1",
