@@ -27,11 +27,7 @@ export default defineConfig({
 			provider: "v8",
 			reporter: ["text", "json", "html"],
 			include: ["test/integration/**/*.ts"],
-			exclude: [
-				"**/node_modules/**",
-				"**/test/**",
-				"**/*.d.ts",
-			],
+			exclude: ["**/node_modules/**", "**/test/**", "**/*.d.ts"],
 		},
 		reporters: ["default", "verbose"],
 	},

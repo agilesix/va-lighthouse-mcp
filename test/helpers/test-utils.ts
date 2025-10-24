@@ -40,7 +40,10 @@ export function createSpy<T extends (...args: any[]) => any>(): {
 /**
  * Assert that a value is defined (not null or undefined)
  */
-export function assertDefined<T>(value: T | null | undefined, message?: string): asserts value is T {
+export function assertDefined<T>(
+	value: T | null | undefined,
+	message?: string,
+): asserts value is T {
 	if (value === null || value === undefined) {
 		throw new Error(message || "Expected value to be defined");
 	}
@@ -74,7 +77,12 @@ export class FetchMock {
 	/**
 	 * Setup a mock that returns text
 	 */
-	mockText(url: string, text: string, status = 200, contentType = "text/plain"): void {
+	mockText(
+		url: string,
+		text: string,
+		status = 200,
+		contentType = "text/plain",
+	): void {
 		const response = new Response(text, {
 			status,
 			headers: { "content-type": contentType },
@@ -99,7 +107,12 @@ export class FetchMock {
 	enable(): void {
 		this.originalFetch = global.fetch;
 		global.fetch = ((url: string | URL | Request, init?: RequestInit) => {
-			const urlString = typeof url === "string" ? url : url instanceof URL ? url.toString() : url.url;
+			const urlString =
+				typeof url === "string"
+					? url
+					: url instanceof URL
+						? url.toString()
+						: url.url;
 
 			const mock = this.mocks.get(urlString);
 			if (mock) {
@@ -169,7 +182,12 @@ export function deepClone<T>(obj: T): T {
 export function deepEqual(a: any, b: any): boolean {
 	if (a === b) return true;
 
-	if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) {
+	if (
+		typeof a !== "object" ||
+		typeof b !== "object" ||
+		a === null ||
+		b === null
+	) {
 		return false;
 	}
 
@@ -226,7 +244,7 @@ export function mockDate(fixedTime: number): { restore: () => void } {
  */
 export async function assertThrows(
 	fn: () => Promise<any>,
-	expectedError?: string | RegExp
+	expectedError?: string | RegExp,
 ): Promise<void> {
 	let thrown = false;
 	let error: Error | null = null;
@@ -246,13 +264,13 @@ export async function assertThrows(
 		if (typeof expectedError === "string") {
 			if (!error.message.includes(expectedError)) {
 				throw new Error(
-					`Expected error message to include "${expectedError}", but got "${error.message}"`
+					`Expected error message to include "${expectedError}", but got "${error.message}"`,
 				);
 			}
 		} else {
 			if (!expectedError.test(error.message)) {
 				throw new Error(
-					`Expected error message to match ${expectedError}, but got "${error.message}"`
+					`Expected error message to match ${expectedError}, but got "${error.message}"`,
 				);
 			}
 		}

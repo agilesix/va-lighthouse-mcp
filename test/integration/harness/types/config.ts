@@ -46,9 +46,7 @@ export const DEFAULT_CONFIG: Partial<TestHarnessConfig> = {
 /**
  * Merge user config with defaults
  */
-export function mergeConfig(
-	userConfig: TestHarnessConfig,
-): TestHarnessConfig {
+export function mergeConfig(userConfig: TestHarnessConfig): TestHarnessConfig {
 	return {
 		...DEFAULT_CONFIG,
 		...userConfig,

@@ -2,7 +2,11 @@
  * Reusable mock data for tests
  */
 
-import type { VAApiMetadata, VAApiInfo, OpenAPISpec } from "../../src/types/va-api.js";
+import type {
+	VAApiMetadata,
+	VAApiInfo,
+	OpenAPISpec,
+} from "../../src/types/va-api.js";
 import sampleApiSpec from "../fixtures/openapi-specs/sample-api.json";
 import apiResponses from "../fixtures/responses/api-responses.json";
 
@@ -57,7 +61,8 @@ export const mockApiInfo: VAApiInfo = {
 	status: "active",
 	authRequired: true,
 	category: "Benefits",
-	documentation: "https://developer.va.gov/explore/verification/docs/address_validation",
+	documentation:
+		"https://developer.va.gov/explore/verification/docs/address_validation",
 	contact: {
 		name: "VA API Support",
 		email: "api@va.gov",
@@ -91,7 +96,11 @@ export const mockHealthCheckResponses = {
 /**
  * Create a mock fetch response
  */
-export function createMockResponse(data: any, status = 200, headers: Record<string, string> = {}): Response {
+export function createMockResponse(
+	data: any,
+	status = 200,
+	headers: Record<string, string> = {},
+): Response {
 	const defaultHeaders = {
 		"content-type": "application/json",
 		...headers,

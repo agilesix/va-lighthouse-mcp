@@ -40,10 +40,16 @@ function printTestResult(test: TestResult, index: number): void {
 		} else {
 			for (const assertion of test.assertions) {
 				if (!assertion.passed) {
-					console.log(`    ${colors.red}✗${colors.reset} ${assertion.type}: ${assertion.message}`);
+					console.log(
+						`    ${colors.red}✗${colors.reset} ${assertion.type}: ${assertion.message}`,
+					);
 					if (assertion.expected !== undefined) {
-						console.log(`      Expected: ${colors.gray}${JSON.stringify(assertion.expected)}${colors.reset}`);
-						console.log(`      Actual:   ${colors.gray}${JSON.stringify(assertion.actual)}${colors.reset}`);
+						console.log(
+							`      Expected: ${colors.gray}${JSON.stringify(assertion.expected)}${colors.reset}`,
+						);
+						console.log(
+							`      Actual:   ${colors.gray}${JSON.stringify(assertion.actual)}${colors.reset}`,
+						);
 					}
 				}
 			}
@@ -76,7 +82,9 @@ function printSummary(results: TestRunResults): void {
 	}
 
 	console.log(`Duration: ${results.summary.duration}ms`);
-	console.log(`Success Rate: ${(results.summary.successRate * 100).toFixed(1)}%`);
+	console.log(
+		`Success Rate: ${(results.summary.successRate * 100).toFixed(1)}%`,
+	);
 	console.log("");
 }
 
@@ -133,8 +141,12 @@ export function printSimple(results: TestRunResults): void {
 	const allPassed = results.summary.failed === 0;
 
 	if (allPassed) {
-		console.log(`${colors.green}${colors.bold}✓ All tests passed${colors.reset} (${results.summary.passed}/${results.summary.total})`);
+		console.log(
+			`${colors.green}${colors.bold}✓ All tests passed${colors.reset} (${results.summary.passed}/${results.summary.total})`,
+		);
 	} else {
-		console.log(`${colors.red}${colors.bold}✗ Tests failed${colors.reset} (${results.summary.failed} failed, ${results.summary.passed} passed)`);
+		console.log(
+			`${colors.red}${colors.bold}✗ Tests failed${colors.reset} (${results.summary.failed} failed, ${results.summary.passed} passed)`,
+		);
 	}
 }

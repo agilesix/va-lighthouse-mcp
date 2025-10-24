@@ -37,8 +37,12 @@ export class VALighthouseMCP extends McpAgent<Env> {
 		console.log("VA Lighthouse API Discovery MCP Server initialized");
 		console.log("Available tool categories:");
 		console.log("  • Discovery: list_lighthouse_apis, get_api_info");
-		console.log("  • Exploration: get_api_summary, list_api_endpoints, get_endpoint_details, get_api_schemas, search_api_operations");
-		console.log("  • Validation: validate_request_payload, validate_response_payload, generate_example_payload, get_validation_rules");
+		console.log(
+			"  • Exploration: get_api_summary, list_api_endpoints, get_endpoint_details, get_api_schemas, search_api_operations",
+		);
+		console.log(
+			"  • Validation: validate_request_payload, validate_response_payload, generate_example_payload, get_validation_rules",
+		);
 		console.log("  • Utilities: check_api_health, compare_api_versions");
 	}
 }

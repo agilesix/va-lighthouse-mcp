@@ -4,8 +4,15 @@
  */
 
 import { z } from "zod";
-import { jsonSchemaToZod, getZodErrorMessage } from "../utils/json-schema-to-zod.js";
-import type { ValidationResult, ValidationError, ValidationWarning } from "../types/mcp-tools.js";
+import {
+	jsonSchemaToZod,
+	getZodErrorMessage,
+} from "../utils/json-schema-to-zod.js";
+import type {
+	ValidationResult,
+	ValidationError,
+	ValidationWarning,
+} from "../types/mcp-tools.js";
 
 export class Validator {
 	/**
@@ -17,7 +24,8 @@ export class Validator {
 		try {
 			zodSchema = jsonSchemaToZod(schema);
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : String(error);
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
 
 			return {
 				valid: false,
@@ -62,12 +70,13 @@ export class Validator {
 	/**
 	 * Format Zod errors into our ValidationError format
 	 */
-	private static formatErrors(zodIssues: z.ZodIssue[], schema: any): ValidationError[] {
+	private static formatErrors(
+		zodIssues: z.ZodIssue[],
+		schema: any,
+	): ValidationError[] {
 		return zodIssues.map((issue) => {
 			// Convert path array to dot notation
-			const field = issue.path.length > 0
-				? issue.path.join(".")
-				: "root";
+			const field = issue.path.length > 0 ? issue.path.join(".") : "root";
 
 			// Get the schema for this field to check for integer type
 			const fieldSchema = this.getFieldSchema(schema, issue.path);
@@ -81,7 +90,10 @@ export class Validator {
 			// Map Zod error codes to our ValidationError types
 			switch (issue.code) {
 				case "invalid_type":
-					if (issue.received === "undefined" && issue.expected !== "undefined") {
+					if (
+						issue.received === "undefined" &&
+						issue.expected !== "undefined"
+					) {
 						// This is likely a missing required field
 						type = "required";
 						message = `Missing required field: ${field}`;
@@ -89,7 +101,10 @@ export class Validator {
 					} else {
 						type = "type";
 						// Check if the field is actually an integer type
-						if (issue.expected === "number" && fieldSchema?.type === "integer") {
+						if (
+							issue.expected === "number" &&
+							fieldSchema?.type === "integer"
+						) {
 							expected = "integer";
 							message = "Invalid type: expected integer";
 							fixSuggestion = "Change the field type to integer";
@@ -188,7 +203,10 @@ export class Validator {
 	/**
 	 * Generate warnings for optional fields and best practices
 	 */
-	private static generateWarnings(payload: any, schema: any): ValidationWarning[] {
+	private static generateWarnings(
+		payload: any,
+		schema: any,
+	): ValidationWarning[] {
 		const warnings: ValidationWarning[] = [];
 
 		// Check for optional fields that are commonly needed
@@ -199,7 +217,10 @@ export class Validator {
 				if (!required.includes(prop) && !payload[prop]) {
 					const propSchema = schema.properties[prop];
 
-					if (propSchema.description?.includes("recommended") || propSchema.description?.includes("should")) {
+					if (
+						propSchema.description?.includes("recommended") ||
+						propSchema.description?.includes("should")
+					) {
 						warnings.push({
 							field: prop,
 							message: `Optional field "${prop}" is not provided but may be useful`,
@@ -286,7 +307,11 @@ export class Validator {
 		let current = schema;
 
 		for (const segment of path) {
-			if (current.type === "object" && current.properties && current.properties[segment]) {
+			if (
+				current.type === "object" &&
+				current.properties &&
+				current.properties[segment]
+			) {
 				current = current.properties[segment];
 			} else if (current.type === "array" && current.items) {
 				current = current.items;

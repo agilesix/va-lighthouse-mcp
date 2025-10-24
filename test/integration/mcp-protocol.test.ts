@@ -210,7 +210,9 @@ describe("MCP Protocol", () => {
 			} catch (error: any) {
 				// Should provide meaningful error about missing argument
 				expect(error).toBeDefined();
-				expect(error.message.toLowerCase()).toMatch(/apiid|argument|parameter|required/);
+				expect(error.message.toLowerCase()).toMatch(
+					/apiid|argument|parameter|required/,
+				);
 			}
 		});
 

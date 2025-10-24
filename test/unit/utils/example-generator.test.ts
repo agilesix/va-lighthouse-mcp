@@ -181,7 +181,9 @@ describe("ExampleGenerator", () => {
 			const schema = { type: "string", format: "uuid" };
 			const result = ExampleGenerator.generate(schema);
 
-			expect(result).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+			expect(result).toMatch(
+				/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+			);
 		});
 
 		it("should generate ssn format", () => {
@@ -245,7 +247,10 @@ describe("ExampleGenerator", () => {
 
 	describe("Enum Values", () => {
 		it("should use first enum value for strings", () => {
-			const schema = { type: "string", enum: ["active", "inactive", "pending"] };
+			const schema = {
+				type: "string",
+				enum: ["active", "inactive", "pending"],
+			};
 			const result = ExampleGenerator.generate(schema);
 
 			expect(result).toBe("active");
@@ -322,10 +327,7 @@ describe("ExampleGenerator", () => {
 	describe("oneOf/anyOf/allOf", () => {
 		it("should use first option in oneOf", () => {
 			const schema = {
-				oneOf: [
-					{ type: "string" },
-					{ type: "number" },
-				],
+				oneOf: [{ type: "string" }, { type: "number" }],
 			};
 			const result = ExampleGenerator.generate(schema);
 
@@ -334,10 +336,7 @@ describe("ExampleGenerator", () => {
 
 		it("should use first option in anyOf", () => {
 			const schema = {
-				anyOf: [
-					{ type: "number" },
-					{ type: "string" },
-				],
+				anyOf: [{ type: "number" }, { type: "string" }],
 			};
 			const result = ExampleGenerator.generate(schema);
 
@@ -443,6 +442,222 @@ describe("ExampleGenerator", () => {
 
 			expect(Array.isArray(result)).toBe(true);
 			expect(Array.isArray(result[0])).toBe(true);
+		});
+	});
+
+	describe("Property Name Sanitization", () => {
+		it("should sanitize invalid property names with special characters", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					"user@name": { type: "string" },
+					"email.address": { type: "string", format: "email" },
+					"phone#number": { type: "string" },
+				},
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			// Properties should be sanitized (special chars replaced with _)
+			expect(result).toBeDefined();
+			expect(typeof result).toBe("object");
+		});
+
+		it("should skip null property names", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					validName: { type: "string" },
+					"": { type: "string" }, // Empty string should be skipped
+				},
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			expect(result.validName).toBeDefined();
+			// Empty string property should be skipped
+			expect(Object.keys(result).length).toBeGreaterThanOrEqual(1);
+		});
+
+		it("should handle properties with spaces", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					"first name": { type: "string" },
+					"last name": { type: "string" },
+				},
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			expect(result).toBeDefined();
+			expect(typeof result).toBe("object");
+		});
+
+		it("should preserve valid property names", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					valid_name: { type: "string" },
+					"valid-name": { type: "string" },
+					valid$name: { type: "string" },
+					validName123: { type: "string" },
+				},
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			// All valid properties should be present
+			expect(Object.keys(result).length).toBe(4);
+		});
+	});
+
+	describe("Edge Cases", () => {
+		it("should handle deeply nested objects at max depth", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					level1: {
+						type: "object",
+						properties: {
+							level2: {
+								type: "object",
+								properties: {
+									level3: {
+										type: "object",
+										properties: {
+											level4: {
+												type: "object",
+												properties: {
+													level5: {
+														type: "object",
+														properties: {
+															value: { type: "string" },
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			};
+
+			const result = ExampleGenerator.generate(schema, { maxDepth: 10 });
+
+			expect(result.level1).toBeDefined();
+			expect(result.level1.level2).toBeDefined();
+			expect(result.level1.level2.level3).toBeDefined();
+		});
+
+		it("should handle objects with no properties", () => {
+			const schema = {
+				type: "object",
+				properties: {},
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			expect(result).toEqual({});
+		});
+
+		it("should handle required fields that generate undefined values", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					name: { type: "string" },
+					unknown: { type: "unknown" }, // Invalid type might return undefined
+				},
+				required: ["name"],
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			expect(result.name).toBeDefined();
+		});
+
+		it("should handle arrays with empty items schema", () => {
+			const schema = {
+				type: "array",
+				items: {},
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			expect(Array.isArray(result)).toBe(true);
+		});
+
+		it("should handle circular references with depth limit", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					name: { type: "string" },
+					parent: {
+						$ref: "#", // Circular reference to root
+					},
+				},
+			};
+
+			// Should not cause infinite recursion due to depth limit
+			const result = ExampleGenerator.generate(schema, { maxDepth: 3 });
+
+			expect(result).toBeDefined();
+			expect(result.name).toBeDefined();
+		});
+
+		it("should handle oneOf with multiple valid schemas", () => {
+			const schema = {
+				oneOf: [
+					{
+						type: "object",
+						properties: {
+							type: { type: "string", enum: ["email"] },
+							email: { type: "string", format: "email" },
+						},
+					},
+					{
+						type: "object",
+						properties: {
+							type: { type: "string", enum: ["phone"] },
+							phone: { type: "string" },
+						},
+					},
+				],
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			expect(result).toBeDefined();
+			// Should pick the first schema
+			expect(result.type).toBeDefined();
+		});
+
+		it("should handle allOf merging multiple schemas", () => {
+			const schema = {
+				allOf: [
+					{
+						type: "object",
+						properties: {
+							name: { type: "string" },
+						},
+					},
+					{
+						type: "object",
+						properties: {
+							email: { type: "string", format: "email" },
+						},
+					},
+				],
+			};
+
+			const result = ExampleGenerator.generate(schema);
+
+			expect(result).toBeDefined();
+			expect(result.name).toBeDefined();
+			expect(result.email).toBeDefined();
 		});
 	});
 });

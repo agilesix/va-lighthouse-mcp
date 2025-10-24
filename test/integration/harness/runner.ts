@@ -8,7 +8,11 @@
 
 import type { IMCPTestClient } from "./types/client.ts";
 import type { TestSpec } from "./types/spec.ts";
-import type { TestResult, TestRunResults, TestSummary } from "./types/results.ts";
+import type {
+	TestResult,
+	TestRunResults,
+	TestSummary,
+} from "./types/results.ts";
 import { runAssertions } from "./assertions/index.ts";
 
 /**
@@ -112,9 +116,10 @@ export class TestRunner {
 			failed: results.filter((r) => !r.passed && !r.skipped).length,
 			skipped: results.filter((r) => r.skipped).length,
 			duration: totalDuration,
-			successRate: results.length > 0
-				? results.filter((r) => r.passed).length / results.length
-				: 0,
+			successRate:
+				results.length > 0
+					? results.filter((r) => r.passed).length / results.length
+					: 0,
 		};
 
 		// Collect failures

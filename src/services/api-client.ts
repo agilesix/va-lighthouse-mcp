@@ -2,7 +2,13 @@
  * API client for fetching VA Lighthouse API metadata and OpenAPI specs
  */
 
-import type { VAApiMetadata, VAApiInfo, VAApiVersionInfo, OpenAPISpec, HealthCheckResponse } from "../types/va-api.js";
+import type {
+	VAApiMetadata,
+	VAApiInfo,
+	VAApiVersionInfo,
+	OpenAPISpec,
+	HealthCheckResponse,
+} from "../types/va-api.js";
 import { metadataCache, openApiCache } from "./cache.js";
 
 const BASE_URL = "https://api.va.gov/internal/docs";
@@ -30,17 +36,25 @@ export class VAApiClient {
 			console.log("[API Client] Response received:");
 			console.log(`  - Status: ${response.status} ${response.statusText}`);
 			console.log(`  - Content-Type: ${response.headers.get("content-type")}`);
-			console.log(`  - Content-Length: ${response.headers.get("content-length")}`);
+			console.log(
+				`  - Content-Length: ${response.headers.get("content-length")}`,
+			);
 			console.log(`  - Fetch time: ${fetchTime}ms`);
 
 			if (!response.ok) {
-				throw new Error(`Failed to fetch API list: ${response.status} ${response.statusText}`);
+				throw new Error(
+					`Failed to fetch API list: ${response.status} ${response.statusText}`,
+				);
 			}
 
 			// Parse the S3 bucket listing (XML)
 			const text = await response.text();
-			console.log(`[API Client] Response body length: ${text.length} characters`);
-			console.log(`[API Client] Response body preview (first 500 chars):\n${text.substring(0, 500)}`);
+			console.log(
+				`[API Client] Response body length: ${text.length} characters`,
+			);
+			console.log(
+				`[API Client] Response body preview (first 500 chars):\n${text.substring(0, 500)}`,
+			);
 
 			const apis = this.parseS3BucketListing(text);
 			console.log(`[API Client] Parsed ${apis.length} APIs from response`);
@@ -51,7 +65,9 @@ export class VAApiClient {
 			return apis;
 		} catch (error) {
 			console.error(`[API Client] Error fetching API list:`, error);
-			throw new Error(`Error fetching API list: ${error instanceof Error ? error.message : String(error)}`);
+			throw new Error(
+				`Error fetching API list: ${error instanceof Error ? error.message : String(error)}`,
+			);
 		}
 	}
 
@@ -73,20 +89,27 @@ export class VAApiClient {
 			const metadataUrl = `${BASE_URL}/${apiId}/metadata.json`;
 			const response = await fetch(metadataUrl);
 
-			console.log(`[API Client] Metadata response: ${response.status} ${response.statusText}`);
+			console.log(
+				`[API Client] Metadata response: ${response.status} ${response.statusText}`,
+			);
 
 			if (!response.ok) {
-				throw new Error(`Failed to fetch metadata for ${apiId}: ${response.status} ${response.statusText}`);
+				throw new Error(
+					`Failed to fetch metadata for ${apiId}: ${response.status} ${response.statusText}`,
+				);
 			}
 
-			const rawMetadata = await response.json() as any;
+			const rawMetadata = (await response.json()) as any;
 			console.log(`[API Client] Metadata structure:`, Object.keys(rawMetadata));
 
 			// VA API metadata has a nested "meta" object structure
 			const meta = rawMetadata.meta || rawMetadata;
 
 			// Fetch version details with base URLs in parallel
-			const versionDetails = await this.fetchVersionDetails(apiId, meta.versions || []);
+			const versionDetails = await this.fetchVersionDetails(
+				apiId,
+				meta.versions || [],
+			);
 
 			// Transform VA metadata format to VAApiInfo format
 			const metadata: VAApiInfo = {
@@ -96,8 +119,13 @@ export class VAApiClient {
 				versions: (meta.versions || []).map((v: any) => v.version),
 				healthCheck: meta.versions?.[0]?.healthcheck,
 				// Path already includes full URL path, just need the base domain
-				openApiUrl: meta.versions?.[0]?.path ? `https://api.va.gov${meta.versions[0].path}` : "",
-				status: meta.versions?.[0]?.status === "Current Version" ? "active" : undefined,
+				openApiUrl: meta.versions?.[0]?.path
+					? `https://api.va.gov${meta.versions[0].path}`
+					: "",
+				status:
+					meta.versions?.[0]?.status === "Current Version"
+						? "active"
+						: undefined,
 				authRequired: meta.versions?.[0]?.security?.length > 0,
 				category: meta.category,
 				documentation: meta.documentation,
@@ -116,27 +144,39 @@ export class VAApiClient {
 
 			return metadata;
 		} catch (error) {
-			console.error(`[API Client] Error fetching metadata for ${apiId}:`, error);
-			throw new Error(`Error fetching metadata for ${apiId}: ${error instanceof Error ? error.message : String(error)}`);
+			console.error(
+				`[API Client] Error fetching metadata for ${apiId}:`,
+				error,
+			);
+			throw new Error(
+				`Error fetching metadata for ${apiId}: ${error instanceof Error ? error.message : String(error)}`,
+			);
 		}
 	}
 
 	/**
 	 * Fetch version details including base URLs for all versions
 	 */
-	private static async fetchVersionDetails(apiId: string, versions: any[]): Promise<VAApiVersionInfo[]> {
+	private static async fetchVersionDetails(
+		apiId: string,
+		versions: any[],
+	): Promise<VAApiVersionInfo[]> {
 		if (!versions || versions.length === 0) {
 			return [];
 		}
 
-		console.log(`[API Client] Fetching version details for ${versions.length} version(s) of ${apiId}`);
+		console.log(
+			`[API Client] Fetching version details for ${versions.length} version(s) of ${apiId}`,
+		);
 
 		// Fetch all version specs in parallel for better performance
 		const versionPromises = versions.map(async (versionMeta, index) => {
 			try {
 				// Only fetch if we have a path to the OpenAPI spec
 				if (!versionMeta.path) {
-					console.log(`[API Client] No path for version ${versionMeta.version}, skipping spec fetch`);
+					console.log(
+						`[API Client] No path for version ${versionMeta.version}, skipping spec fetch`,
+					);
 					return null;
 				}
 
@@ -148,25 +188,35 @@ export class VAApiClient {
 					baseUrl: spec.servers?.[0]?.url || "",
 					openApiUrl: `https://api.va.gov${versionMeta.path}`,
 					healthCheck: versionMeta.healthcheck,
-					status: versionMeta.status === "Current Version" ? "current" : "deprecated",
+					status:
+						versionMeta.status === "Current Version" ? "current" : "deprecated",
 					isCurrent: index === 0, // First version in array is the current one
 				};
 
-				console.log(`[API Client] Fetched details for ${apiId} ${versionMeta.version}:`, {
-					baseUrl: versionInfo.baseUrl,
-					status: versionInfo.status,
-				});
+				console.log(
+					`[API Client] Fetched details for ${apiId} ${versionMeta.version}:`,
+					{
+						baseUrl: versionInfo.baseUrl,
+						status: versionInfo.status,
+					},
+				);
 
 				return versionInfo;
 			} catch (error) {
-				console.warn(`[API Client] Failed to fetch spec for ${apiId} ${versionMeta.version}:`, error instanceof Error ? error.message : String(error));
+				console.warn(
+					`[API Client] Failed to fetch spec for ${apiId} ${versionMeta.version}:`,
+					error instanceof Error ? error.message : String(error),
+				);
 				// Return partial info even if spec fetch fails
 				return {
 					version: versionMeta.version,
 					baseUrl: "", // Empty if we couldn't fetch the spec
-					openApiUrl: versionMeta.path ? `https://api.va.gov${versionMeta.path}` : "",
+					openApiUrl: versionMeta.path
+						? `https://api.va.gov${versionMeta.path}`
+						: "",
 					healthCheck: versionMeta.healthcheck,
-					status: versionMeta.status === "Current Version" ? "current" : "deprecated",
+					status:
+						versionMeta.status === "Current Version" ? "current" : "deprecated",
 					isCurrent: index === 0,
 				} as VAApiVersionInfo;
 			}
@@ -182,7 +232,10 @@ export class VAApiClient {
 	/**
 	 * Fetch OpenAPI spec for a specific API version
 	 */
-	static async getOpenApiSpec(apiId: string, version: string): Promise<OpenAPISpec> {
+	static async getOpenApiSpec(
+		apiId: string,
+		version: string,
+	): Promise<OpenAPISpec> {
 		// Check cache first
 		const cacheKey = `openapi:${apiId}:${version}`;
 		const cached = openApiCache.get(cacheKey);
@@ -195,24 +248,30 @@ export class VAApiClient {
 			const response = await fetch(specUrl);
 
 			if (!response.ok) {
-				throw new Error(`Failed to fetch OpenAPI spec: ${response.status} ${response.statusText}`);
+				throw new Error(
+					`Failed to fetch OpenAPI spec: ${response.status} ${response.statusText}`,
+				);
 			}
 
-			const spec = await response.json() as OpenAPISpec;
+			const spec = (await response.json()) as OpenAPISpec;
 
 			// Cache the result
 			openApiCache.set(cacheKey, spec);
 
 			return spec;
 		} catch (error) {
-			throw new Error(`Error fetching OpenAPI spec for ${apiId} v${version}: ${error instanceof Error ? error.message : String(error)}`);
+			throw new Error(
+				`Error fetching OpenAPI spec for ${apiId} v${version}: ${error instanceof Error ? error.message : String(error)}`,
+			);
 		}
 	}
 
 	/**
 	 * Check API health endpoint
 	 */
-	static async checkHealth(healthCheckUrl: string): Promise<HealthCheckResponse> {
+	static async checkHealth(
+		healthCheckUrl: string,
+	): Promise<HealthCheckResponse> {
 		try {
 			const response = await fetch(healthCheckUrl);
 
@@ -227,14 +286,14 @@ export class VAApiClient {
 				};
 			}
 
-			const data = await response.json() as any;
+			const data = (await response.json()) as any;
 
 			// Support multiple health check response formats
 			// VA APIs may return { status: "UP" } or { success: true }
 			const isHealthy =
-			data.status === "UP" ||
-			data.success === true ||
-			data.default?.success === true;
+				data.status === "UP" ||
+				data.success === true ||
+				data.default?.success === true;
 
 			return {
 				status: isHealthy ? "UP" : "UNKNOWN",
@@ -260,15 +319,24 @@ export class VAApiClient {
 		console.log(`[S3 Parser] Input length: ${xml.length} characters`);
 
 		// Check if response looks like HTML instead of XML
-		if (xml.trimStart().startsWith("<!DOCTYPE html") || xml.trimStart().startsWith("<html")) {
-			console.warn("[S3 Parser] WARNING: Response appears to be HTML, not XML!");
-			console.warn("[S3 Parser] This likely means the S3 bucket listing endpoint is not available");
+		if (
+			xml.trimStart().startsWith("<!DOCTYPE html") ||
+			xml.trimStart().startsWith("<html")
+		) {
+			console.warn(
+				"[S3 Parser] WARNING: Response appears to be HTML, not XML!",
+			);
+			console.warn(
+				"[S3 Parser] This likely means the S3 bucket listing endpoint is not available",
+			);
 			return [];
 		}
 
 		// Check if response is valid XML
 		if (!xml.includes("<?xml") && !xml.includes("<ListBucketResult")) {
-			console.warn("[S3 Parser] WARNING: Response does not appear to be S3 XML format");
+			console.warn(
+				"[S3 Parser] WARNING: Response does not appear to be S3 XML format",
+			);
 			console.warn("[S3 Parser] Expected <?xml or <ListBucketResult tags");
 		}
 
@@ -298,7 +366,9 @@ export class VAApiClient {
 			altPatterns.forEach((pattern, i) => {
 				const altMatches = [...xml.matchAll(pattern)];
 				if (altMatches.length > 0) {
-					console.log(`[S3 Parser] Alternative pattern ${i + 1} found ${altMatches.length} matches`);
+					console.log(
+						`[S3 Parser] Alternative pattern ${i + 1} found ${altMatches.length} matches`,
+					);
 				}
 			});
 		}
@@ -323,13 +393,17 @@ export class VAApiClient {
 					name: this.formatApiName(apiId),
 					versions: [],
 				});
-				console.log(`[S3 Parser] Added API: ${apiId} -> ${this.formatApiName(apiId)}`);
+				console.log(
+					`[S3 Parser] Added API: ${apiId} -> ${this.formatApiName(apiId)}`,
+				);
 			} else if (seenIds.has(apiId)) {
 				skippedCount++;
 			}
 		}
 
-		console.log(`[S3 Parser] Results: ${apis.length} APIs added, ${skippedCount} entries skipped`);
+		console.log(
+			`[S3 Parser] Results: ${apis.length} APIs added, ${skippedCount} entries skipped`,
+		);
 
 		if (apis.length === 0) {
 			console.warn("[S3 Parser] WARNING: Parsing returned 0 APIs!");

@@ -15,13 +15,8 @@ import type { TestRunResults } from "../types/results.ts";
  * @param pretty - Pretty print (default: true)
  * @returns JSON string
  */
-export function formatAsJSON(
-	results: TestRunResults,
-	pretty = true,
-): string {
-	return pretty
-		? JSON.stringify(results, null, 2)
-		: JSON.stringify(results);
+export function formatAsJSON(results: TestRunResults, pretty = true): string {
+	return pretty ? JSON.stringify(results, null, 2) : JSON.stringify(results);
 }
 
 /**
@@ -30,10 +25,7 @@ export function formatAsJSON(
  * @param results - Test run results
  * @param pretty - Pretty print (default: true)
  */
-export function printJSON(
-	results: TestRunResults,
-	pretty = true,
-): void {
+export function printJSON(results: TestRunResults, pretty = true): void {
 	console.log(formatAsJSON(results, pretty));
 }
 

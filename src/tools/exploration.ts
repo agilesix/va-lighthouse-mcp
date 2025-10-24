@@ -10,16 +10,21 @@ import { OpenAPIParser } from "../services/openapi-parser.js";
 /**
  * Simplify a JSON schema based on detail level and max depth
  */
-function simplifySchema(schema: any, detailLevel: string = "standard", maxDepth: number = 3, currentDepth: number = 0): any {
-	if (!schema || typeof schema !== 'object') {
+function simplifySchema(
+	schema: any,
+	detailLevel: string = "standard",
+	maxDepth: number = 3,
+	currentDepth: number = 0,
+): any {
+	if (!schema || typeof schema !== "object") {
 		return schema;
 	}
 
 	// If we've exceeded max depth, return a simplified placeholder
 	if (currentDepth >= maxDepth) {
 		return {
-			type: schema.type || 'object',
-			'...': 'Use get_validation_rules with fieldPath to explore deeper',
+			type: schema.type || "object",
+			"...": "Use get_validation_rules with fieldPath to explore deeper",
 		};
 	}
 
@@ -31,7 +36,7 @@ function simplifySchema(schema: any, detailLevel: string = "standard", maxDepth:
 	}
 
 	// Minimal: Only required fields and types
-	if (detailLevel === 'minimal') {
+	if (detailLevel === "minimal") {
 		if (schema.required && schema.required.length > 0) {
 			simplified.required = schema.required;
 		}
@@ -41,7 +46,7 @@ function simplifySchema(schema: any, detailLevel: string = "standard", maxDepth:
 			for (const [key, value] of Object.entries(schema.properties)) {
 				const propSchema: any = value;
 				simplified.properties[key] = {
-					type: propSchema.type || 'unknown',
+					type: propSchema.type || "unknown",
 					required: schema.required?.includes(key) || false,
 				};
 			}
@@ -55,7 +60,7 @@ function simplifySchema(schema: any, detailLevel: string = "standard", maxDepth:
 	}
 
 	// Standard: Include descriptions and examples, respect max depth
-	if (detailLevel === 'standard') {
+	if (detailLevel === "standard") {
 		if (schema.description) {
 			simplified.description = schema.description;
 		}
@@ -81,8 +86,10 @@ function simplifySchema(schema: any, detailLevel: string = "standard", maxDepth:
 		}
 
 		if (schema.minLength !== undefined || schema.maxLength !== undefined) {
-			if (schema.minLength !== undefined) simplified.minLength = schema.minLength;
-			if (schema.maxLength !== undefined) simplified.maxLength = schema.maxLength;
+			if (schema.minLength !== undefined)
+				simplified.minLength = schema.minLength;
+			if (schema.maxLength !== undefined)
+				simplified.maxLength = schema.maxLength;
 		}
 
 		if (schema.minimum !== undefined || schema.maximum !== undefined) {
@@ -93,12 +100,22 @@ function simplifySchema(schema: any, detailLevel: string = "standard", maxDepth:
 		if (schema.properties) {
 			simplified.properties = {};
 			for (const [key, value] of Object.entries(schema.properties)) {
-				simplified.properties[key] = simplifySchema(value, detailLevel, maxDepth, currentDepth + 1);
+				simplified.properties[key] = simplifySchema(
+					value,
+					detailLevel,
+					maxDepth,
+					currentDepth + 1,
+				);
 			}
 		}
 
 		if (schema.items) {
-			simplified.items = simplifySchema(schema.items, detailLevel, maxDepth, currentDepth + 1);
+			simplified.items = simplifySchema(
+				schema.items,
+				detailLevel,
+				maxDepth,
+				currentDepth + 1,
+			);
 		}
 
 		return simplified;
@@ -111,9 +128,13 @@ function simplifySchema(schema: any, detailLevel: string = "standard", maxDepth:
 /**
  * Format schema output based on detail level
  */
-function formatSchemaOutput(schema: any, detailLevel: string, maxDepth: number): string {
-	if (detailLevel === 'minimal') {
-		const simplified = simplifySchema(schema, 'minimal', maxDepth);
+function formatSchemaOutput(
+	schema: any,
+	detailLevel: string,
+	maxDepth: number,
+): string {
+	if (detailLevel === "minimal") {
+		const simplified = simplifySchema(schema, "minimal", maxDepth);
 		return formatMinimalSchema(simplified);
 	}
 
@@ -124,7 +145,7 @@ function formatSchemaOutput(schema: any, detailLevel: string, maxDepth: number):
 /**
  * Format minimal schema as a clean tree structure
  */
-function formatMinimalSchema(schema: any, indent: string = '  '): string {
+function formatMinimalSchema(schema: any, indent: string = "  "): string {
 	const lines: string[] = [];
 
 	if (schema.type) {
@@ -132,27 +153,33 @@ function formatMinimalSchema(schema: any, indent: string = '  '): string {
 	}
 
 	if (schema.required && schema.required.length > 0) {
-		lines.push(`Required: ${schema.required.join(', ')}`);
+		lines.push(`Required: ${schema.required.join(", ")}`);
 	}
 
 	if (schema.enum) {
-		lines.push(`Allowed values: ${schema.enum.join(', ')}`);
+		lines.push(`Allowed values: ${schema.enum.join(", ")}`);
 	}
 
 	if (schema.properties) {
 		const required = schema.required || [];
-		const optional = Object.keys(schema.properties).filter(k => !required.includes(k));
+		const optional = Object.keys(schema.properties).filter(
+			(k) => !required.includes(k),
+		);
 
 		if (required.length > 0) {
-			lines.push(`Required fields (${required.length}): ${required.join(', ')}`);
+			lines.push(
+				`Required fields (${required.length}): ${required.join(", ")}`,
+			);
 		}
 
 		if (optional.length > 0) {
-			lines.push(`Optional fields (${optional.length}): ${optional.join(', ')}`);
+			lines.push(
+				`Optional fields (${optional.length}): ${optional.join(", ")}`,
+			);
 		}
 	}
 
-	return lines.join('\n' + indent);
+	return lines.join("\n" + indent);
 }
 
 export function registerExplorationTools(server: McpServer) {
@@ -186,13 +213,18 @@ export function registerExplorationTools(server: McpServer) {
 				output.push(`Total Endpoints: ${summary.totalEndpoints}`, "");
 
 				if (summary.authMethods && summary.authMethods.length > 0) {
-					output.push(`Authentication Methods: ${summary.authMethods.join(", ")}`, "");
+					output.push(
+						`Authentication Methods: ${summary.authMethods.join(", ")}`,
+						"",
+					);
 				}
 
 				if (summary.tags && summary.tags.length > 0) {
 					output.push(`Tags (${summary.tags.length}):`);
 					for (const tag of summary.tags) {
-						output.push(`  • ${tag.name} (${tag.endpointCount} endpoint${tag.endpointCount === 1 ? "" : "s"})`);
+						output.push(
+							`  • ${tag.name} (${tag.endpointCount} endpoint${tag.endpointCount === 1 ? "" : "s"})`,
+						);
 						if (tag.description) {
 							output.push(`    ${tag.description}`);
 						}
@@ -202,8 +234,10 @@ export function registerExplorationTools(server: McpServer) {
 
 				if (summary.contact) {
 					output.push("Contact:");
-					if (summary.contact.name) output.push(`  Name: ${summary.contact.name}`);
-					if (summary.contact.email) output.push(`  Email: ${summary.contact.email}`);
+					if (summary.contact.name)
+						output.push(`  Name: ${summary.contact.name}`);
+					if (summary.contact.email)
+						output.push(`  Email: ${summary.contact.email}`);
 					if (summary.contact.url) output.push(`  URL: ${summary.contact.url}`);
 				}
 
@@ -234,8 +268,14 @@ export function registerExplorationTools(server: McpServer) {
 			apiId: z.string().describe("The API ID"),
 			version: z.string().describe("The API version"),
 			tag: z.string().optional().describe("Filter by tag"),
-			method: z.string().optional().describe("Filter by HTTP method (GET, POST, etc.)"),
-			includeDeprecated: z.boolean().optional().describe("Include deprecated endpoints"),
+			method: z
+				.string()
+				.optional()
+				.describe("Filter by HTTP method (GET, POST, etc.)"),
+			includeDeprecated: z
+				.boolean()
+				.optional()
+				.describe("Include deprecated endpoints"),
 		},
 		async ({ apiId, version, tag, method, includeDeprecated }) => {
 			try {
@@ -309,11 +349,32 @@ Use minimal for quick structure overview, standard for most cases, full only whe
 			apiId: z.string().describe("The API ID"),
 			version: z.string().describe("The API version"),
 			path: z.string().describe("The endpoint path (e.g., '/veterans/{id}')"),
-			method: z.string().describe("The HTTP method (GET, POST, PUT, PATCH, DELETE)"),
-			detail_level: z.enum(["minimal", "standard", "full"]).optional().describe("Schema detail level (default: standard). Use 'minimal' to avoid truncation on complex endpoints."),
-			max_depth: z.number().min(1).max(10).optional().describe("Maximum nesting depth for schemas (default: 3). Lower values prevent truncation."),
+			method: z
+				.string()
+				.describe("The HTTP method (GET, POST, PUT, PATCH, DELETE)"),
+			detail_level: z
+				.enum(["minimal", "standard", "full"])
+				.optional()
+				.describe(
+					"Schema detail level (default: standard). Use 'minimal' to avoid truncation on complex endpoints.",
+				),
+			max_depth: z
+				.number()
+				.min(1)
+				.max(10)
+				.optional()
+				.describe(
+					"Maximum nesting depth for schemas (default: 3). Lower values prevent truncation.",
+				),
 		},
-		async ({ apiId, version, path, method, detail_level = "standard", max_depth = 3 }) => {
+		async ({
+			apiId,
+			version,
+			path,
+			method,
+			detail_level = "standard",
+			max_depth = 3,
+		}) => {
 			try {
 				const spec = await VAApiClient.getOpenApiSpec(apiId, version);
 				const parser = new OpenAPIParser(spec);
@@ -332,10 +393,7 @@ Use minimal for quick structure overview, standard for most cases, full only whe
 					};
 				}
 
-				const output = [
-					`${details.method} ${details.path}`,
-					"",
-				];
+				const output = [`${details.method} ${details.path}`, ""];
 
 				if (details.deprecated) {
 					output.push("⚠️  DEPRECATED", "");
@@ -381,7 +439,9 @@ Use minimal for quick structure overview, standard for most cases, full only whe
 
 				// Request Body
 				if (details.requestBody) {
-					const required = details.requestBody.required ? " (required)" : " (optional)";
+					const required = details.requestBody.required
+						? " (required)"
+						: " (optional)";
 					output.push(`Request Body${required}:`);
 
 					if (details.requestBody.description) {
@@ -391,12 +451,23 @@ Use minimal for quick structure overview, standard for most cases, full only whe
 					output.push(`  Content-Type: ${details.requestBody.contentType}`);
 
 					if (details.requestBody.schema) {
-						const schemaOutput = formatSchemaOutput(details.requestBody.schema, detail_level, max_depth);
-						output.push(`  Schema:\n${schemaOutput.split('\n').map(l => '    ' + l).join('\n')}`);
+						const schemaOutput = formatSchemaOutput(
+							details.requestBody.schema,
+							detail_level,
+							max_depth,
+						);
+						output.push(
+							`  Schema:\n${schemaOutput
+								.split("\n")
+								.map((l) => "    " + l)
+								.join("\n")}`,
+						);
 					}
 
-					if (details.requestBody.example && detail_level !== 'minimal') {
-						output.push(`  Example: ${JSON.stringify(details.requestBody.example, null, 2)}`);
+					if (details.requestBody.example && detail_level !== "minimal") {
+						output.push(
+							`  Example: ${JSON.stringify(details.requestBody.example, null, 2)}`,
+						);
 					}
 
 					output.push("");
@@ -404,7 +475,9 @@ Use minimal for quick structure overview, standard for most cases, full only whe
 
 				// Responses
 				output.push("Responses:");
-				for (const [statusCode, response] of Object.entries(details.responses)) {
+				for (const [statusCode, response] of Object.entries(
+					details.responses,
+				)) {
 					output.push(`  ${statusCode}: ${response.description}`);
 
 					if (response.contentType) {
@@ -412,12 +485,23 @@ Use minimal for quick structure overview, standard for most cases, full only whe
 					}
 
 					if (response.schema) {
-						const schemaOutput = formatSchemaOutput(response.schema, detail_level, max_depth);
-						output.push(`    Schema:\n${schemaOutput.split('\n').map(l => '      ' + l).join('\n')}`);
+						const schemaOutput = formatSchemaOutput(
+							response.schema,
+							detail_level,
+							max_depth,
+						);
+						output.push(
+							`    Schema:\n${schemaOutput
+								.split("\n")
+								.map((l) => "      " + l)
+								.join("\n")}`,
+						);
 					}
 
-					if (response.example && detail_level !== 'minimal') {
-						output.push(`    Example: ${JSON.stringify(response.example, null, 2)}`);
+					if (response.example && detail_level !== "minimal") {
+						output.push(
+							`    Example: ${JSON.stringify(response.example, null, 2)}`,
+						);
 					}
 				}
 
@@ -428,7 +512,9 @@ Use minimal for quick structure overview, standard for most cases, full only whe
 					output.push("Security:");
 					for (const secReq of details.security) {
 						for (const [scheme, scopes] of Object.entries(secReq)) {
-							output.push(`  • ${scheme}${scopes.length > 0 ? `: ${scopes.join(", ")}` : ""}`);
+							output.push(
+								`  • ${scheme}${scopes.length > 0 ? `: ${scopes.join(", ")}` : ""}`,
+							);
 						}
 					}
 				}
@@ -467,7 +553,10 @@ Returns: Array of schema names with type, description, and properties.`,
 		{
 			apiId: z.string().describe("The API ID"),
 			version: z.string().describe("The API version"),
-			schemaName: z.string().optional().describe("Optional: specific schema name to retrieve"),
+			schemaName: z
+				.string()
+				.optional()
+				.describe("Optional: specific schema name to retrieve"),
 		},
 		async ({ apiId, version, schemaName }) => {
 			try {
@@ -538,7 +627,9 @@ To view schemas for this API:
 					}
 
 					if (schema.properties && schema.properties.length > 0) {
-						output.push(`  Properties (${schema.properties.length}): ${schema.properties.join(", ")}`);
+						output.push(
+							`  Properties (${schema.properties.length}): ${schema.properties.join(", ")}`,
+						);
 					}
 
 					if (schema.required && schema.required.length > 0) {
@@ -574,7 +665,11 @@ To view schemas for this API:
 		{
 			apiId: z.string().describe("The API ID"),
 			version: z.string().describe("The API version"),
-			query: z.string().describe("Search query (searches paths, summaries, descriptions, operation IDs, and tags)"),
+			query: z
+				.string()
+				.describe(
+					"Search query (searches paths, summaries, descriptions, operation IDs, and tags)",
+				),
 		},
 		async ({ apiId, version, query }) => {
 			try {
@@ -607,7 +702,9 @@ To view schemas for this API:
 				}
 
 				if (results.length === 0) {
-					output.push("No matching endpoints found. Try a different search query.");
+					output.push(
+						"No matching endpoints found. Try a different search query.",
+					);
 				}
 
 				return {

@@ -13,7 +13,9 @@ export class ErrorFormatter {
 			return "No errors";
 		}
 
-		const lines = [`Found ${errors.length} validation error${errors.length === 1 ? "" : "s"}:\n`];
+		const lines = [
+			`Found ${errors.length} validation error${errors.length === 1 ? "" : "s"}:\n`,
+		];
 
 		for (let i = 0; i < errors.length; i++) {
 			const error = errors[i];
@@ -46,7 +48,9 @@ export class ErrorFormatter {
 			return "";
 		}
 
-		const lines = [`\nFound ${warnings.length} warning${warnings.length === 1 ? "" : "s"}:\n`];
+		const lines = [
+			`\nFound ${warnings.length} warning${warnings.length === 1 ? "" : "s"}:\n`,
+		];
 
 		for (let i = 0; i < warnings.length; i++) {
 			const warning = warnings[i];
@@ -66,7 +70,11 @@ export class ErrorFormatter {
 	/**
 	 * Format complete validation result
 	 */
-	static formatValidationResult(result: { valid: boolean; errors: ValidationError[]; warnings?: ValidationWarning[] }): string {
+	static formatValidationResult(result: {
+		valid: boolean;
+		errors: ValidationError[];
+		warnings?: ValidationWarning[];
+	}): string {
 		if (result.valid) {
 			let output = "✓ Payload is valid";
 

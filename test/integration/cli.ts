@@ -66,7 +66,10 @@ async function runCommand(): Promise<void> {
 			const spec = await loadTestSpec(file);
 			specs.push(spec);
 		} catch (error) {
-			console.error(`Error loading ${file}:`, error instanceof Error ? error.message : error);
+			console.error(
+				`Error loading ${file}:`,
+				error instanceof Error ? error.message : error,
+			);
 			process.exit(1);
 		}
 	}
@@ -101,7 +104,10 @@ async function runCommand(): Promise<void> {
 		// Exit with appropriate code
 		process.exit(results.summary.failed > 0 ? 1 : 0);
 	} catch (error) {
-		console.error("Error running tests:", error instanceof Error ? error.message : error);
+		console.error(
+			"Error running tests:",
+			error instanceof Error ? error.message : error,
+		);
 		await runner.disconnect();
 		process.exit(1);
 	}
@@ -148,7 +154,9 @@ async function generateCommand(): Promise<void> {
 	const toolName = args[1];
 
 	if (!toolName) {
-		console.error("Usage: npm run integration:generate <tool-name> [--args '<json>'] [--output <file>]");
+		console.error(
+			"Usage: npm run integration:generate <tool-name> [--args '<json>'] [--output <file>]",
+		);
 		process.exit(1);
 	}
 

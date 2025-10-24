@@ -93,7 +93,9 @@ describe("VAApiClient - Version Details", () => {
 			expect(v2.baseUrl).toBe("https://sandbox-api.va.gov/services/claims/v2");
 			expect(v2.isCurrent).toBe(true);
 			expect(v2.status).toBe("current");
-			expect(v2.healthCheck).toBe("https://api.va.gov/services/claims/v2/healthcheck");
+			expect(v2.healthCheck).toBe(
+				"https://api.va.gov/services/claims/v2/healthcheck",
+			);
 
 			// Check v1 (deprecated)
 			const v1 = result.versionDetails![1];
@@ -199,7 +201,11 @@ describe("VAApiClient - Version Details", () => {
 				}
 				if (url.includes("openapi.json")) {
 					// Simulate fetch failure
-					return Promise.resolve({ ok: false, status: 404, statusText: "Not Found" });
+					return Promise.resolve({
+						ok: false,
+						status: 404,
+						statusText: "Not Found",
+					});
 				}
 				return Promise.reject(new Error("Unexpected URL"));
 			});
@@ -210,7 +216,9 @@ describe("VAApiClient - Version Details", () => {
 			expect(result.versionDetails).toHaveLength(1);
 			expect(result.versionDetails![0].version).toBe("v1");
 			expect(result.versionDetails![0].baseUrl).toBe("");
-			expect(result.versionDetails![0].healthCheck).toBe("https://api.va.gov/services/failed/v1/healthcheck");
+			expect(result.versionDetails![0].healthCheck).toBe(
+				"https://api.va.gov/services/failed/v1/healthcheck",
+			);
 		});
 
 		it("should handle versions without path", async () => {
@@ -266,9 +274,21 @@ describe("VAApiClient - Version Details", () => {
 				meta: {
 					display_name: "Test API Multi",
 					versions: [
-						{ version: "v3", path: "/services/multi/v3/openapi.json", status: "Current Version" },
-						{ version: "v2", path: "/services/multi/v2/openapi.json", status: "Deprecated" },
-						{ version: "v1", path: "/services/multi/v1/openapi.json", status: "Deprecated" },
+						{
+							version: "v3",
+							path: "/services/multi/v3/openapi.json",
+							status: "Current Version",
+						},
+						{
+							version: "v2",
+							path: "/services/multi/v2/openapi.json",
+							status: "Deprecated",
+						},
+						{
+							version: "v1",
+							path: "/services/multi/v1/openapi.json",
+							status: "Deprecated",
+						},
 					],
 				},
 			};
@@ -356,7 +376,11 @@ describe("VAApiClient - Version Details", () => {
 			const apis = await VAApiClient.listApis();
 
 			expect(apis).toHaveLength(3);
-			expect(apis.map((a) => a.id)).toEqual(["benefits-claims", "address-validation", "veteran-verification"]);
+			expect(apis.map((a) => a.id)).toEqual([
+				"benefits-claims",
+				"address-validation",
+				"veteran-verification",
+			]);
 			expect(apis[0]).toMatchObject({
 				id: "benefits-claims",
 				name: "Benefits Claims",
@@ -436,13 +460,17 @@ describe("VAApiClient - Version Details", () => {
 				},
 			});
 
-			await expect(VAApiClient.listApis()).rejects.toThrow("Failed to fetch API list: 500 Internal Server Error");
+			await expect(VAApiClient.listApis()).rejects.toThrow(
+				"Failed to fetch API list: 500 Internal Server Error",
+			);
 		});
 
 		it("should throw error on network failure", async () => {
 			(global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
 
-			await expect(VAApiClient.listApis()).rejects.toThrow("Error fetching API list: Network error");
+			await expect(VAApiClient.listApis()).rejects.toThrow(
+				"Error fetching API list: Network error",
+			);
 		});
 
 		it("should cache API list results", async () => {
@@ -574,7 +602,9 @@ describe("VAApiClient - Version Details", () => {
 		});
 
 		it("should return DOWN status for network error", async () => {
-			(global.fetch as any).mockRejectedValueOnce(new Error("Connection timeout"));
+			(global.fetch as any).mockRejectedValueOnce(
+				new Error("Connection timeout"),
+			);
 
 			const result = await VAApiClient.checkHealth("https://api.va.gov/health");
 
@@ -594,7 +624,9 @@ describe("VAApiClient - Version Details", () => {
 			const result = await VAApiClient.checkHealth("https://api.va.gov/health");
 
 			expect(result.timestamp).toBeDefined();
-			expect(new Date(result.timestamp).getTime()).toBeGreaterThan(Date.now() - 1000);
+			expect(new Date(result.timestamp).getTime()).toBeGreaterThan(
+				Date.now() - 1000,
+			);
 		});
 	});
 
@@ -620,7 +652,7 @@ describe("VAApiClient - Version Details", () => {
 
 			expect(result).toEqual(mockSpec);
 			expect(global.fetch).toHaveBeenCalledWith(
-				"https://api.va.gov/internal/docs/test-api/v1/openapi.json"
+				"https://api.va.gov/internal/docs/test-api/v1/openapi.json",
 			);
 		});
 
@@ -653,16 +685,18 @@ describe("VAApiClient - Version Details", () => {
 				statusText: "Not Found",
 			});
 
-			await expect(VAApiClient.getOpenApiSpec("nonexistent", "v1")).rejects.toThrow(
-				"Failed to fetch OpenAPI spec: 404 Not Found"
-			);
+			await expect(
+				VAApiClient.getOpenApiSpec("nonexistent", "v1"),
+			).rejects.toThrow("Failed to fetch OpenAPI spec: 404 Not Found");
 		});
 
 		it("should throw error on network failure", async () => {
 			(global.fetch as any).mockRejectedValueOnce(new Error("Timeout"));
 
-			await expect(VAApiClient.getOpenApiSpec("test-api", "v1")).rejects.toThrow(
-				"Error fetching OpenAPI spec for test-api vv1: Timeout"
+			await expect(
+				VAApiClient.getOpenApiSpec("test-api", "v1"),
+			).rejects.toThrow(
+				"Error fetching OpenAPI spec for test-api vv1: Timeout",
 			);
 		});
 
@@ -681,7 +715,7 @@ describe("VAApiClient - Version Details", () => {
 			await VAApiClient.getOpenApiSpec("benefits-claims", "v2");
 
 			expect(global.fetch).toHaveBeenCalledWith(
-				"https://api.va.gov/internal/docs/benefits-claims/v2/openapi.json"
+				"https://api.va.gov/internal/docs/benefits-claims/v2/openapi.json",
 			);
 		});
 	});

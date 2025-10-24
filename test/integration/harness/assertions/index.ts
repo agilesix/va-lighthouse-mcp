@@ -45,11 +45,19 @@ export async function runAssertions(
 					break;
 
 				case "contains_text":
-					result = checkContainsText(response, assertion.text, assertion.caseInsensitive);
+					result = checkContainsText(
+						response,
+						assertion.text,
+						assertion.caseInsensitive,
+					);
 					break;
 
 				case "not_contains_text":
-					result = checkNotContainsText(response, assertion.text, assertion.caseInsensitive);
+					result = checkNotContainsText(
+						response,
+						assertion.text,
+						assertion.caseInsensitive,
+					);
 					break;
 
 				case "response_time_ms":
@@ -57,11 +65,19 @@ export async function runAssertions(
 					break;
 
 				case "json_path":
-					result = await checkJsonPath(response, assertion.path, assertion.expected);
+					result = await checkJsonPath(
+						response,
+						assertion.path,
+						assertion.expected,
+					);
 					break;
 
 				case "regex_match":
-					result = checkRegexMatch(response, assertion.pattern, assertion.flags);
+					result = checkRegexMatch(
+						response,
+						assertion.pattern,
+						assertion.flags,
+					);
 					break;
 
 				case "snapshot":
@@ -78,7 +94,8 @@ export async function runAssertions(
 					result = {
 						type: "json_schema",
 						passed: false,
-						message: "JSON Schema assertions not yet implemented in this context",
+						message:
+							"JSON Schema assertions not yet implemented in this context",
 					};
 					break;
 

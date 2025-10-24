@@ -10,42 +10,108 @@ import type { VAApiMetadata } from "../types/va-api.js";
 /**
  * Category mapping for VA Lighthouse APIs
  */
-const API_CATEGORIES: Record<string, { category: string; description: string }> = {
+const API_CATEGORIES: Record<
+	string,
+	{ category: string; description: string }
+> = {
 	// Benefits APIs
-	"benefits-claims": { category: "benefits", description: "Submit and track benefits claims" },
-	"benefits-intake": { category: "benefits", description: "Upload benefits-related documents" },
-	"decision-reviews": { category: "benefits", description: "Request decision reviews and appeals" },
-	"appeals": { category: "benefits", description: "Track and manage appeals" },
-	"loan-guaranty": { category: "benefits", description: "Home loan benefit information" },
-	"notice-of-disagreement": { category: "benefits", description: "File notice of disagreement" },
-	"supplemental-claims": { category: "benefits", description: "Submit supplemental claims" },
-	"higher-level-reviews": { category: "benefits", description: "Request higher-level reviews" },
+	"benefits-claims": {
+		category: "benefits",
+		description: "Submit and track benefits claims",
+	},
+	"benefits-intake": {
+		category: "benefits",
+		description: "Upload benefits-related documents",
+	},
+	"decision-reviews": {
+		category: "benefits",
+		description: "Request decision reviews and appeals",
+	},
+	appeals: { category: "benefits", description: "Track and manage appeals" },
+	"loan-guaranty": {
+		category: "benefits",
+		description: "Home loan benefit information",
+	},
+	"notice-of-disagreement": {
+		category: "benefits",
+		description: "File notice of disagreement",
+	},
+	"supplemental-claims": {
+		category: "benefits",
+		description: "Submit supplemental claims",
+	},
+	"higher-level-reviews": {
+		category: "benefits",
+		description: "Request higher-level reviews",
+	},
 
 	// Health APIs
-	"health": { category: "health", description: "Access patient health records (FHIR)" },
-	"fhir": { category: "health", description: "VA Health FHIR API" },
-	"community-care": { category: "health", description: "Community care eligibility" },
-	"prescriptions": { category: "health", description: "Prescription tracking and refills" },
-	"appointments": { category: "health", description: "Schedule and manage VA appointments" },
-	"immunizations": { category: "health", description: "Immunization records" },
+	health: {
+		category: "health",
+		description: "Access patient health records (FHIR)",
+	},
+	fhir: { category: "health", description: "VA Health FHIR API" },
+	"community-care": {
+		category: "health",
+		description: "Community care eligibility",
+	},
+	prescriptions: {
+		category: "health",
+		description: "Prescription tracking and refills",
+	},
+	appointments: {
+		category: "health",
+		description: "Schedule and manage VA appointments",
+	},
+	immunizations: { category: "health", description: "Immunization records" },
 
 	// Facilities APIs
-	"facilities": { category: "facilities", description: "Find VA facilities and services" },
-	"va-facilities": { category: "facilities", description: "VA facilities locator" },
+	facilities: {
+		category: "facilities",
+		description: "Find VA facilities and services",
+	},
+	"va-facilities": {
+		category: "facilities",
+		description: "VA facilities locator",
+	},
 
 	// Verification APIs
-	"veteran-verification": { category: "verification", description: "Verify veteran status" },
-	"veteran-confirmation": { category: "verification", description: "Confirm veteran status" },
-	"disability-rating": { category: "verification", description: "Access disability rating information" },
-	"service-history": { category: "verification", description: "Military service history verification" },
-	"veteran-status": { category: "verification", description: "Veteran status confirmation" },
+	"veteran-verification": {
+		category: "verification",
+		description: "Verify veteran status",
+	},
+	"veteran-confirmation": {
+		category: "verification",
+		description: "Confirm veteran status",
+	},
+	"disability-rating": {
+		category: "verification",
+		description: "Access disability rating information",
+	},
+	"service-history": {
+		category: "verification",
+		description: "Military service history verification",
+	},
+	"veteran-status": {
+		category: "verification",
+		description: "Veteran status confirmation",
+	},
 
 	// Other APIs
-	"address-validation": { category: "other", description: "Validate postal addresses" },
-	"forms": { category: "other", description: "VA forms library and submission" },
-	"representative": { category: "other", description: "Accredited representative information" },
-	"direct-deposit": { category: "other", description: "Manage direct deposit information" },
-	"letters": { category: "other", description: "Generate VA benefit letters" },
+	"address-validation": {
+		category: "other",
+		description: "Validate postal addresses",
+	},
+	forms: { category: "other", description: "VA forms library and submission" },
+	representative: {
+		category: "other",
+		description: "Accredited representative information",
+	},
+	"direct-deposit": {
+		category: "other",
+		description: "Manage direct deposit information",
+	},
+	letters: { category: "other", description: "Generate VA benefit letters" },
 };
 
 export function registerDiscoveryTools(server: McpServer) {
@@ -56,10 +122,23 @@ export function registerDiscoveryTools(server: McpServer) {
 		"list_lighthouse_apis",
 		"Lists all available VA Lighthouse APIs with their metadata, optionally filtered by category",
 		{
-			includeDeprecated: z.boolean().optional().describe("Include deprecated APIs in the results"),
-			category: z.enum(["benefits", "health", "facilities", "verification", "other", "all"])
+			includeDeprecated: z
+				.boolean()
 				.optional()
-				.describe("Filter APIs by category (benefits, health, facilities, verification, other, all). Default: all"),
+				.describe("Include deprecated APIs in the results"),
+			category: z
+				.enum([
+					"benefits",
+					"health",
+					"facilities",
+					"verification",
+					"other",
+					"all",
+				])
+				.optional()
+				.describe(
+					"Filter APIs by category (benefits, health, facilities, verification, other, all). Default: all",
+				),
 		},
 		async ({ includeDeprecated, category }) => {
 			try {
@@ -86,14 +165,17 @@ export function registerDiscoveryTools(server: McpServer) {
 				}
 
 				// Group APIs by category
-				const grouped = filtered.reduce((acc, api) => {
-					const cat = api.category || "other";
-					if (!acc[cat]) {
-						acc[cat] = [];
-					}
-					acc[cat].push(api);
-					return acc;
-				}, {} as Record<string, VAApiMetadata[]>);
+				const grouped = filtered.reduce(
+					(acc, api) => {
+						const cat = api.category || "other";
+						if (!acc[cat]) {
+							acc[cat] = [];
+						}
+						acc[cat].push(api);
+						return acc;
+					},
+					{} as Record<string, VAApiMetadata[]>,
+				);
 
 				// Format output
 				const output = [
@@ -115,7 +197,13 @@ export function registerDiscoveryTools(server: McpServer) {
 					other: "Other",
 				};
 
-				const categoryOrder = ["benefits", "health", "facilities", "verification", "other"];
+				const categoryOrder = [
+					"benefits",
+					"health",
+					"facilities",
+					"verification",
+					"other",
+				];
 
 				// Output APIs grouped by category
 				for (const cat of categoryOrder) {
@@ -163,18 +251,16 @@ export function registerDiscoveryTools(server: McpServer) {
 		"get_api_info",
 		"Gets detailed information about a specific VA Lighthouse API",
 		{
-			apiId: z.string().describe("The API ID (e.g., 'benefits-claims', 'facilities')"),
+			apiId: z
+				.string()
+				.describe("The API ID (e.g., 'benefits-claims', 'facilities')"),
 		},
 		async ({ apiId }) => {
 			try {
 				const apiInfo = await VAApiClient.getApiMetadata(apiId);
 
 				// Format output
-				const output = [
-					`API: ${apiInfo.name}`,
-					`ID: ${apiInfo.id}`,
-					"",
-				];
+				const output = [`API: ${apiInfo.name}`, `ID: ${apiInfo.id}`, ""];
 
 				if (apiInfo.description) {
 					output.push(`Description: ${apiInfo.description}`, "");
@@ -185,7 +271,9 @@ export function registerDiscoveryTools(server: McpServer) {
 				}
 
 				if (apiInfo.authRequired !== undefined) {
-					output.push(`Authentication Required: ${apiInfo.authRequired ? "Yes" : "No"}`);
+					output.push(
+						`Authentication Required: ${apiInfo.authRequired ? "Yes" : "No"}`,
+					);
 				}
 
 				if (apiInfo.category) {
@@ -196,7 +284,9 @@ export function registerDiscoveryTools(server: McpServer) {
 
 				// Display version details if available
 				if (apiInfo.versionDetails && apiInfo.versionDetails.length > 0) {
-					output.push(`Available Versions (${apiInfo.versionDetails.length}):\n`);
+					output.push(
+						`Available Versions (${apiInfo.versionDetails.length}):\n`,
+					);
 
 					for (const version of apiInfo.versionDetails) {
 						// Add marker for current version

@@ -16,7 +16,10 @@ export function registerUtilityTools(server: McpServer) {
 		"Checks the health status of an API",
 		{
 			apiId: z.string().describe("The API ID"),
-			healthCheckUrl: z.string().optional().describe("Optional: custom health check URL (if not in metadata)"),
+			healthCheckUrl: z
+				.string()
+				.optional()
+				.describe("Optional: custom health check URL (if not in metadata)"),
 		},
 		async ({ apiId, healthCheckUrl }) => {
 			try {
@@ -101,7 +104,10 @@ export function registerUtilityTools(server: McpServer) {
 				]);
 
 				// Get schemas for both versions
-				const [schemas1, schemas2] = await Promise.all([parser1.listSchemas(), parser2.listSchemas()]);
+				const [schemas1, schemas2] = await Promise.all([
+					parser1.listSchemas(),
+					parser2.listSchemas(),
+				]);
 
 				// Build endpoint maps
 				const endpointMap1 = new Map(
@@ -114,7 +120,11 @@ export function registerUtilityTools(server: McpServer) {
 				// Find added, removed, and potentially modified endpoints
 				const endpointsAdded: string[] = [];
 				const endpointsRemoved: string[] = [];
-				const endpointsModified: Array<{ path: string; method: string; changes: string[] }> = [];
+				const endpointsModified: Array<{
+					path: string;
+					method: string;
+					changes: string[];
+				}> = [];
 
 				// Check for added endpoints
 				for (const key of endpointMap2.keys()) {
@@ -131,7 +141,9 @@ export function registerUtilityTools(server: McpServer) {
 						}
 
 						if (e1.deprecated !== e2.deprecated) {
-							changes.push(e2.deprecated ? "Marked as deprecated" : "No longer deprecated");
+							changes.push(
+								e2.deprecated ? "Marked as deprecated" : "No longer deprecated",
+							);
 						}
 
 						if (changes.length > 0) {

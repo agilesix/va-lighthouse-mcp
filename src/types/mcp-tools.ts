@@ -5,7 +5,17 @@
 export interface ValidationError {
 	field: string;
 	message: string;
-	type: "required" | "type" | "format" | "pattern" | "enum" | "minLength" | "maxLength" | "minimum" | "maximum" | "custom";
+	type:
+		| "required"
+		| "type"
+		| "format"
+		| "pattern"
+		| "enum"
+		| "minLength"
+		| "maxLength"
+		| "minimum"
+		| "maximum"
+		| "custom";
 	path: string;
 	expected?: any;
 	received?: any;
@@ -52,12 +62,15 @@ export interface EndpointDetails extends EndpointInfo {
 		schema: any;
 		example?: any;
 	};
-	responses: Record<string, {
-		description: string;
-		contentType?: string;
-		schema?: any;
-		example?: any;
-	}>;
+	responses: Record<
+		string,
+		{
+			description: string;
+			contentType?: string;
+			schema?: any;
+			example?: any;
+		}
+	>;
 	security?: Array<Record<string, string[]>>;
 }
 

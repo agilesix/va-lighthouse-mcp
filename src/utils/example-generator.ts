@@ -8,7 +8,10 @@ export class ExampleGenerator {
 	/**
 	 * Generate example payload from JSON schema
 	 */
-	static generate(schema: any, options?: { requiredOnly?: boolean; depth?: number }): any {
+	static generate(
+		schema: any,
+		options?: { requiredOnly?: boolean; depth?: number },
+	): any {
 		const depth = options?.depth || 0;
 
 		// Prevent infinite recursion
@@ -58,12 +61,26 @@ export class ExampleGenerator {
 
 			default:
 				// Handle oneOf, anyOf, allOf
-				if (schema.oneOf && Array.isArray(schema.oneOf) && schema.oneOf.length > 0) {
-					return this.generate(schema.oneOf[0], { ...options, depth: depth + 1 });
+				if (
+					schema.oneOf &&
+					Array.isArray(schema.oneOf) &&
+					schema.oneOf.length > 0
+				) {
+					return this.generate(schema.oneOf[0], {
+						...options,
+						depth: depth + 1,
+					});
 				}
 
-				if (schema.anyOf && Array.isArray(schema.anyOf) && schema.anyOf.length > 0) {
-					return this.generate(schema.anyOf[0], { ...options, depth: depth + 1 });
+				if (
+					schema.anyOf &&
+					Array.isArray(schema.anyOf) &&
+					schema.anyOf.length > 0
+				) {
+					return this.generate(schema.anyOf[0], {
+						...options,
+						depth: depth + 1,
+					});
 				}
 
 				if (schema.allOf && Array.isArray(schema.allOf)) {
@@ -74,7 +91,10 @@ export class ExampleGenerator {
 							Object.assign(merged.properties, subSchema.properties);
 						}
 						if (subSchema.required) {
-							merged.required = [...(merged.required || []), ...subSchema.required];
+							merged.required = [
+								...(merged.required || []),
+								...subSchema.required,
+							];
 						}
 					}
 					return this.generate(merged, { ...options, depth: depth + 1 });
@@ -87,7 +107,10 @@ export class ExampleGenerator {
 	/**
 	 * Generate example object
 	 */
-	private static generateObject(schema: any, options?: { requiredOnly?: boolean; depth?: number }): any {
+	private static generateObject(
+		schema: any,
+		options?: { requiredOnly?: boolean; depth?: number },
+	): any {
 		const obj: any = {};
 		const properties = schema.properties || {};
 		const required = schema.required || [];
@@ -105,7 +128,10 @@ export class ExampleGenerator {
 				continue;
 			}
 
-			const value = this.generate(properties[prop], { ...options, depth: depth + 1 });
+			const value = this.generate(properties[prop], {
+				...options,
+				depth: depth + 1,
+			});
 
 			// Only add property if value is not undefined
 			if (value !== undefined) {
@@ -134,7 +160,10 @@ export class ExampleGenerator {
 	/**
 	 * Generate example array
 	 */
-	private static generateArray(schema: any, options?: { requiredOnly?: boolean; depth?: number }): any[] {
+	private static generateArray(
+		schema: any,
+		options?: { requiredOnly?: boolean; depth?: number },
+	): any[] {
 		if (!schema.items) {
 			return [];
 		}
@@ -147,7 +176,10 @@ export class ExampleGenerator {
 		const items = [];
 
 		for (let i = 0; i < itemCount; i++) {
-			const item = this.generate(schema.items, { ...options, depth: depth + 1 });
+			const item = this.generate(schema.items, {
+				...options,
+				depth: depth + 1,
+			});
 			// Only add item if it's not undefined
 			if (item !== undefined) {
 				items.push(item);

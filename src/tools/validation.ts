@@ -16,16 +16,18 @@ import { ErrorFormatter } from "../utils/error-formatter.js";
  */
 function ensureObject(payload: any): any {
 	// If payload is already an object (not string), return it
-	if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+	if (payload && typeof payload === "object" && !Array.isArray(payload)) {
 		return payload;
 	}
 
 	// If payload is a string, try to parse it as JSON
-	if (typeof payload === 'string') {
+	if (typeof payload === "string") {
 		try {
 			return JSON.parse(payload);
 		} catch (error) {
-			throw new Error(`Invalid JSON payload: ${error instanceof Error ? error.message : String(error)}`);
+			throw new Error(
+				`Invalid JSON payload: ${error instanceof Error ? error.message : String(error)}`,
+			);
 		}
 	}
 
@@ -46,7 +48,9 @@ export function registerValidationTools(server: McpServer) {
 			version: z.string().describe("The API version"),
 			path: z.string().describe("The endpoint path"),
 			method: z.string().describe("The HTTP method"),
-			payload: z.any().describe("The request payload to validate (JSON object)"),
+			payload: z
+				.any()
+				.describe("The request payload to validate (JSON object)"),
 		},
 		async ({ apiId, version, path, method, payload }) => {
 			try {
@@ -92,10 +96,11 @@ export function registerValidationTools(server: McpServer) {
 					content: [{ type: "text", text: output }],
 				};
 			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : String(error);
+				const errorMessage =
+					error instanceof Error ? error.message : String(error);
 
 				// Provide better error context for JSON parsing issues
-				if (errorMessage.includes('Invalid JSON')) {
+				if (errorMessage.includes("Invalid JSON")) {
 					return {
 						content: [
 							{
@@ -131,8 +136,12 @@ export function registerValidationTools(server: McpServer) {
 			version: z.string().describe("The API version"),
 			path: z.string().describe("The endpoint path"),
 			method: z.string().describe("The HTTP method"),
-			statusCode: z.string().describe("The response status code (e.g., '200', '400')"),
-			payload: z.any().describe("The response payload to validate (JSON object)"),
+			statusCode: z
+				.string()
+				.describe("The response status code (e.g., '200', '400')"),
+			payload: z
+				.any()
+				.describe("The response payload to validate (JSON object)"),
 		},
 		async ({ apiId, version, path, method, statusCode, payload }) => {
 			try {
@@ -189,10 +198,11 @@ export function registerValidationTools(server: McpServer) {
 					content: [{ type: "text", text: output }],
 				};
 			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : String(error);
+				const errorMessage =
+					error instanceof Error ? error.message : String(error);
 
 				// Provide better error context for JSON parsing issues
-				if (errorMessage.includes('Invalid JSON')) {
+				if (errorMessage.includes("Invalid JSON")) {
 					return {
 						content: [
 							{
@@ -228,7 +238,10 @@ export function registerValidationTools(server: McpServer) {
 			version: z.string().describe("The API version"),
 			path: z.string().describe("The endpoint path"),
 			method: z.string().describe("The HTTP method"),
-			requiredOnly: z.boolean().optional().describe("Generate only required fields (default: false)"),
+			requiredOnly: z
+				.boolean()
+				.optional()
+				.describe("Generate only required fields (default: false)"),
 		},
 		async ({ apiId, version, path, method, requiredOnly }) => {
 			try {
@@ -275,7 +288,9 @@ export function registerValidationTools(server: McpServer) {
 				if (requiredOnly) {
 					output.push("Note: This example includes only required fields.");
 				} else {
-					output.push("Note: This example includes both required and optional fields.");
+					output.push(
+						"Note: This example includes both required and optional fields.",
+					);
 				}
 
 				return {
@@ -322,8 +337,16 @@ Examples:
 			version: z.string().describe("The API version"),
 			path: z.string().describe("The endpoint path"),
 			method: z.string().describe("The HTTP method"),
-			requestOrResponse: z.enum(["request", "response"]).optional().describe("Whether to get request or response validation rules (default: request)"),
-			fieldPath: z.string().optional().describe(`Dot-notation path to specific field for detailed rules.
+			requestOrResponse: z
+				.enum(["request", "response"])
+				.optional()
+				.describe(
+					"Whether to get request or response validation rules (default: request)",
+				),
+			fieldPath: z
+				.string()
+				.optional()
+				.describe(`Dot-notation path to specific field for detailed rules.
 
 Examples:
   • "data.type" - top-level field
@@ -333,7 +356,14 @@ Examples:
 Without fieldPath: Returns schema overview (type, required fields, property list)
 With fieldPath: Returns detailed rules (pattern, enum values, format, examples)`),
 		},
-		async ({ apiId, version, path, method, requestOrResponse = "request", fieldPath }) => {
+		async ({
+			apiId,
+			version,
+			path,
+			method,
+			requestOrResponse = "request",
+			fieldPath,
+		}) => {
 			try {
 				const spec = await VAApiClient.getOpenApiSpec(apiId, version);
 				const parser = new OpenAPIParser(spec);
@@ -425,8 +455,10 @@ With fieldPath: Returns detailed rules (pattern, enum values, format, examples)`
 
 				// Add helpful tip when fieldPath is not provided
 				if (!fieldPath) {
-					output.push("💡 Tip: Add 'fieldPath' parameter to get detailed rules for specific fields");
-					output.push("   Example: fieldPath = \"data.attributes.type\"");
+					output.push(
+						"💡 Tip: Add 'fieldPath' parameter to get detailed rules for specific fields",
+					);
+					output.push('   Example: fieldPath = "data.attributes.type"');
 					output.push("");
 				}
 
@@ -472,7 +504,9 @@ With fieldPath: Returns detailed rules (pattern, enum values, format, examples)`
 
 				if (targetSchema.properties) {
 					const propNames = Object.keys(targetSchema.properties);
-					output.push(`Properties (${propNames.length}): ${propNames.join(", ")}`);
+					output.push(
+						`Properties (${propNames.length}): ${propNames.join(", ")}`,
+					);
 				}
 
 				if (targetSchema.example !== undefined) {

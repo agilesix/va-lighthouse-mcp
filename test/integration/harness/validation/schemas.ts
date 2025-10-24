@@ -83,7 +83,9 @@ export const TestSpecSchema = z.object({
 	description: z.string().optional(),
 	tool: z.string().min(1, "Tool name is required"),
 	arguments: z.record(z.any()),
-	assertions: z.array(AssertionSchema).min(1, "At least one assertion required"),
+	assertions: z
+		.array(AssertionSchema)
+		.min(1, "At least one assertion required"),
 	timeout: z.number().positive().optional(),
 	skip: z.boolean().optional(),
 	only: z.boolean().optional(),

@@ -83,9 +83,7 @@ export class MCPClient {
 			return;
 		} catch (error) {
 			// If streamable-http fails, try SSE transport
-			console.log(
-				`StreamableHTTP transport failed, trying SSE: ${error}`,
-			);
+			console.log(`StreamableHTTP transport failed, trying SSE: ${error}`);
 
 			try {
 				// Create new client for SSE attempt

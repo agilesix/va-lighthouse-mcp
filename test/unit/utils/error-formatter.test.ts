@@ -4,8 +4,14 @@
 
 import { describe, it, expect } from "vitest";
 import { ErrorFormatter } from "../../../src/utils/error-formatter.js";
-import { mockValidationErrors, mockValidationWarnings } from "../../helpers/mock-data.js";
-import type { ValidationError, ValidationWarning } from "../../../src/types/mcp-tools.js";
+import {
+	mockValidationErrors,
+	mockValidationWarnings,
+} from "../../helpers/mock-data.js";
+import type {
+	ValidationError,
+	ValidationWarning,
+} from "../../../src/types/mcp-tools.js";
 
 describe("ErrorFormatter", () => {
 	describe("formatErrors()", () => {
@@ -86,7 +92,9 @@ describe("ErrorFormatter", () => {
 		});
 
 		it("should format single warning", () => {
-			const warnings: ValidationWarning[] = [mockValidationWarnings.optionalField];
+			const warnings: ValidationWarning[] = [
+				mockValidationWarnings.optionalField,
+			];
 			const result = ErrorFormatter.formatWarnings(warnings);
 
 			expect(result).toContain("1 warning");
@@ -112,7 +120,9 @@ describe("ErrorFormatter", () => {
 		});
 
 		it("should include suggestions when present", () => {
-			const warnings: ValidationWarning[] = [mockValidationWarnings.optionalField];
+			const warnings: ValidationWarning[] = [
+				mockValidationWarnings.optionalField,
+			];
 			const result = ErrorFormatter.formatWarnings(warnings);
 
 			expect(result).toContain("Suggestion:");
@@ -149,7 +159,10 @@ describe("ErrorFormatter", () => {
 		it("should format invalid result", () => {
 			const validationResult = {
 				valid: false,
-				errors: [mockValidationErrors.requiredField, mockValidationErrors.typeError],
+				errors: [
+					mockValidationErrors.requiredField,
+					mockValidationErrors.typeError,
+				],
 			};
 			const result = ErrorFormatter.formatValidationResult(validationResult);
 
@@ -205,7 +218,8 @@ describe("ErrorFormatter", () => {
 		it("should handle long error messages", () => {
 			const longError: ValidationError = {
 				field: "verylongfieldnamethatexceedsnormalexpectations",
-				message: "This is a very long error message that contains a lot of information about what went wrong and how to fix it",
+				message:
+					"This is a very long error message that contains a lot of information about what went wrong and how to fix it",
 				type: "custom",
 				path: "/path/to/very/deeply/nested/field/in/object",
 			};
@@ -218,7 +232,8 @@ describe("ErrorFormatter", () => {
 		it("should handle special characters in messages", () => {
 			const specialError: ValidationError = {
 				field: "data",
-				message: "Invalid format: expected <type> but got 'value' with \"quotes\"",
+				message:
+					"Invalid format: expected <type> but got 'value' with \"quotes\"",
 				type: "custom",
 				path: "/",
 			};

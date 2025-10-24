@@ -242,7 +242,9 @@ describe("LRUCache", () => {
 
 	describe("Singleton Instances", () => {
 		it("should export singleton cache instances", async () => {
-			const { metadataCache, openApiCache } = await import("../../../src/services/cache.js");
+			const { metadataCache, openApiCache } = await import(
+				"../../../src/services/cache.js"
+			);
 
 			expect(metadataCache).toBeDefined();
 			expect(openApiCache).toBeDefined();

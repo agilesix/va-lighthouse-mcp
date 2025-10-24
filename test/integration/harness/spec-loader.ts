@@ -44,9 +44,7 @@ export async function loadTestSpec(filePath: string): Promise<TestSpec> {
 		return validateTestSpec(data);
 	} catch (error) {
 		if (error instanceof Error) {
-			throw new Error(
-				`Invalid test spec in ${filePath}: ${error.message}`,
-			);
+			throw new Error(`Invalid test spec in ${filePath}: ${error.message}`);
 		}
 		throw error;
 	}
@@ -130,9 +128,6 @@ export function serializeTestSpecToYAML(spec: TestSpec): string {
  * @param pretty - Pretty print (default: true)
  * @returns JSON string
  */
-export function serializeTestSpecToJSON(
-	spec: TestSpec,
-	pretty = true,
-): string {
+export function serializeTestSpecToJSON(spec: TestSpec, pretty = true): string {
 	return pretty ? JSON.stringify(spec, null, 2) : JSON.stringify(spec);
 }

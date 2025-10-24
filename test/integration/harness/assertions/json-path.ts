@@ -30,7 +30,9 @@ function evaluateJsonPath(obj: any, path: string): any {
 	}
 
 	// Split path into segments
-	const segments = normalizedPath.split(/\.|\[/).map((s) => s.replace(/\]/, ""));
+	const segments = normalizedPath
+		.split(/\.|\[/)
+		.map((s) => s.replace(/\]/, ""));
 
 	let current = obj;
 

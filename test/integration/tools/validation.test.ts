@@ -82,7 +82,10 @@ describe("Validation Tools", () => {
 			const text = client.getTextContent(result);
 
 			// Skip if endpoint doesn't exist or doesn't accept a body
-			if (text.includes("Endpoint not found") || text.includes("does not accept a request body")) {
+			if (
+				text.includes("Endpoint not found") ||
+				text.includes("does not accept a request body")
+			) {
 				return;
 			}
 
@@ -247,7 +250,9 @@ describe("Validation Tools", () => {
 			const text = client.getTextContent(result);
 
 			// Should describe validation rules or indicate no body
-			expect(text).toMatch(/Validation|rules|schema|does not accept a request body/i);
+			expect(text).toMatch(
+				/Validation|rules|schema|does not accept a request body/i,
+			);
 		});
 
 		it("should handle requestOrResponse parameter", async () => {
@@ -310,7 +315,10 @@ describe("Validation Tools", () => {
 			const text = client.getTextContent(result);
 
 			// Skip if endpoint doesn't exist or doesn't accept a body
-			if (text.includes("Endpoint not found") || text.includes("does not accept a request body")) {
+			if (
+				text.includes("Endpoint not found") ||
+				text.includes("does not accept a request body")
+			) {
 				// Instead, just verify ajv is not mentioned anywhere in the codebase
 				expect(text.toLowerCase()).not.toContain("ajv");
 				return;
@@ -374,13 +382,16 @@ describe("Validation Tools", () => {
 			const text = client.getTextContent(result);
 
 			// Skip if endpoint doesn't exist
-			if (text.includes("Endpoint not found") || text.includes("does not accept a request body")) {
+			if (
+				text.includes("Endpoint not found") ||
+				text.includes("does not accept a request body")
+			) {
 				return;
 			}
 
 			// Should not throw "expected object, received string" error
 			expect(text).not.toContain("Invalid type: expected object");
-			expect(text).not.toContain("Received: \"string\"");
+			expect(text).not.toContain('Received: "string"');
 
 			// Should provide validation feedback
 			expect(text).toMatch(/valid|Validation|error/i);
@@ -398,7 +409,10 @@ describe("Validation Tools", () => {
 			const text = client.getTextContent(result);
 
 			// Skip if endpoint doesn't exist
-			if (text.includes("Endpoint not found") || text.includes("does not accept a request body")) {
+			if (
+				text.includes("Endpoint not found") ||
+				text.includes("does not accept a request body")
+			) {
 				return;
 			}
 
@@ -420,7 +434,7 @@ describe("Validation Tools", () => {
 
 			// Should not throw "expected object, received string" error
 			expect(text).not.toContain("Invalid type: expected object");
-			expect(text).not.toContain("Received: \"string\"");
+			expect(text).not.toContain('Received: "string"');
 
 			// Should provide validation result
 			expect(text).toMatch(/valid|Validation|error/i);

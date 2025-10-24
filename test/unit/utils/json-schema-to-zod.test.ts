@@ -3,7 +3,10 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { jsonSchemaToZod, getZodErrorMessage } from "../../../src/utils/json-schema-to-zod.js";
+import {
+	jsonSchemaToZod,
+	getZodErrorMessage,
+} from "../../../src/utils/json-schema-to-zod.js";
 import { z } from "zod";
 
 describe("jsonSchemaToZod", () => {
@@ -19,10 +22,7 @@ describe("jsonSchemaToZod", () => {
 
 		it("should handle nullable fields with oneOf", () => {
 			const schema = {
-				oneOf: [
-					{ type: "string" },
-					{ type: "null" },
-				],
+				oneOf: [{ type: "string" }, { type: "null" }],
 			};
 
 			const zodSchema = jsonSchemaToZod(schema);
@@ -71,7 +71,9 @@ describe("jsonSchemaToZod", () => {
 			const zodSchema = jsonSchemaToZod(schema);
 
 			expect(zodSchema.safeParse("user@example.com").success).toBe(true);
-			expect(zodSchema.safeParse("test.user+tag@domain.co.uk").success).toBe(true);
+			expect(zodSchema.safeParse("test.user+tag@domain.co.uk").success).toBe(
+				true,
+			);
 			expect(zodSchema.safeParse("invalid@").success).toBe(false);
 			expect(zodSchema.safeParse("@example.com").success).toBe(false);
 		});
@@ -326,10 +328,7 @@ describe("jsonSchemaToZod", () => {
 
 		it("should handle anyOf unions", () => {
 			const schema = {
-				anyOf: [
-					{ type: "string" },
-					{ type: "number" },
-				],
+				anyOf: [{ type: "string" }, { type: "number" }],
 			};
 
 			const zodSchema = jsonSchemaToZod(schema);
@@ -351,6 +350,240 @@ describe("jsonSchemaToZod", () => {
 
 			expect(zodSchema.safeParse("hello").success).toBe(true);
 			expect(zodSchema.safeParse(150).success).toBe(true);
+		});
+	});
+
+	describe("Integer Type Handling", () => {
+		it("should enforce integer constraint", () => {
+			const schema = {
+				type: "integer",
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(42).success).toBe(true);
+			expect(zodSchema.safeParse(0).success).toBe(true);
+			expect(zodSchema.safeParse(-10).success).toBe(true);
+			expect(zodSchema.safeParse(3.14).success).toBe(false); // Not an integer
+		});
+
+		it("should handle integer with minimum constraint", () => {
+			const schema = {
+				type: "integer",
+				minimum: 0,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(0).success).toBe(true);
+			expect(zodSchema.safeParse(10).success).toBe(true);
+			expect(zodSchema.safeParse(-1).success).toBe(false);
+		});
+
+		it("should handle integer with maximum constraint", () => {
+			const schema = {
+				type: "integer",
+				maximum: 100,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(100).success).toBe(true);
+			expect(zodSchema.safeParse(50).success).toBe(true);
+			expect(zodSchema.safeParse(101).success).toBe(false);
+		});
+
+		it("should handle integer with exclusiveMinimum", () => {
+			const schema = {
+				type: "integer",
+				exclusiveMinimum: 0,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(1).success).toBe(true);
+			expect(zodSchema.safeParse(0).success).toBe(false);
+			expect(zodSchema.safeParse(-1).success).toBe(false);
+		});
+
+		it("should handle integer with exclusiveMaximum", () => {
+			const schema = {
+				type: "integer",
+				exclusiveMaximum: 100,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(99).success).toBe(true);
+			expect(zodSchema.safeParse(100).success).toBe(false);
+			expect(zodSchema.safeParse(101).success).toBe(false);
+		});
+
+		it("should handle integer with multipleOf", () => {
+			const schema = {
+				type: "integer",
+				multipleOf: 5,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(10).success).toBe(true);
+			expect(zodSchema.safeParse(15).success).toBe(true);
+			expect(zodSchema.safeParse(0).success).toBe(true);
+			expect(zodSchema.safeParse(7).success).toBe(false);
+		});
+
+		it("should handle integer enum", () => {
+			const schema = {
+				type: "integer",
+				enum: [1, 2, 3],
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			// Enum for numbers gets transformed to string enum then back to number
+			expect(zodSchema.safeParse("1").success).toBe(true);
+			expect(zodSchema.safeParse("2").success).toBe(true);
+			expect(zodSchema.safeParse("4").success).toBe(false);
+		});
+	});
+
+	describe("Number Type Constraints", () => {
+		it("should handle number with exclusiveMinimum", () => {
+			const schema = {
+				type: "number",
+				exclusiveMinimum: 0,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(0.1).success).toBe(true);
+			expect(zodSchema.safeParse(0).success).toBe(false);
+		});
+
+		it("should handle number with exclusiveMaximum", () => {
+			const schema = {
+				type: "number",
+				exclusiveMaximum: 10,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(9.99).success).toBe(true);
+			expect(zodSchema.safeParse(10).success).toBe(false);
+		});
+
+		it("should handle number with multipleOf", () => {
+			const schema = {
+				type: "number",
+				multipleOf: 0.5,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(1.5).success).toBe(true);
+			expect(zodSchema.safeParse(2.0).success).toBe(true);
+			expect(zodSchema.safeParse(1.3).success).toBe(false);
+		});
+	});
+
+	describe("Array Constraints", () => {
+		it("should handle array with minItems", () => {
+			const schema = {
+				type: "array",
+				items: { type: "string" },
+				minItems: 2,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(["a", "b"]).success).toBe(true);
+			expect(zodSchema.safeParse(["a", "b", "c"]).success).toBe(true);
+			expect(zodSchema.safeParse(["a"]).success).toBe(false);
+		});
+
+		it("should handle array with maxItems", () => {
+			const schema = {
+				type: "array",
+				items: { type: "string" },
+				maxItems: 3,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse(["a"]).success).toBe(true);
+			expect(zodSchema.safeParse(["a", "b", "c"]).success).toBe(true);
+			expect(zodSchema.safeParse(["a", "b", "c", "d"]).success).toBe(false);
+		});
+
+		it("should handle array with both minItems and maxItems", () => {
+			const schema = {
+				type: "array",
+				items: { type: "number" },
+				minItems: 1,
+				maxItems: 3,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse([1]).success).toBe(true);
+			expect(zodSchema.safeParse([1, 2, 3]).success).toBe(true);
+			expect(zodSchema.safeParse([]).success).toBe(false);
+			expect(zodSchema.safeParse([1, 2, 3, 4]).success).toBe(false);
+		});
+	});
+
+	describe("Object Additional Properties", () => {
+		it("should allow additional properties when additionalProperties is true", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					name: { type: "string" },
+				},
+				additionalProperties: true,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse({ name: "John", age: 30 }).success).toBe(true);
+		});
+
+		it("should disallow additional properties when additionalProperties is false", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					name: { type: "string" },
+				},
+				additionalProperties: false,
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			expect(zodSchema.safeParse({ name: "John" }).success).toBe(true);
+			expect(zodSchema.safeParse({ name: "John", age: 30 }).success).toBe(
+				false,
+			);
+		});
+
+		it("should handle additionalProperties with schema definition", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					name: { type: "string" },
+				},
+				additionalProperties: {
+					type: "number",
+				},
+			};
+
+			const zodSchema = jsonSchemaToZod(schema);
+
+			// When additionalProperties is an object schema, it uses passthrough
+			// which allows additional properties but doesn't validate their types
+			expect(zodSchema.safeParse({ name: "John", age: 30 }).success).toBe(true);
+			expect(zodSchema.safeParse({ name: "John", age: "thirty" }).success).toBe(
+				true,
+			);
 		});
 	});
 });

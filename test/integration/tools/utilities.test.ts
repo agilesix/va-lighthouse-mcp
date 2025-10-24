@@ -122,7 +122,9 @@ describe("Utility Tools", () => {
 			expect(text.length).toBeGreaterThan(100);
 
 			// Should mention endpoints or changes
-			expect(text).toMatch(/endpoint|change|difference|added|removed|modified/i);
+			expect(text).toMatch(
+				/endpoint|change|difference|added|removed|modified/i,
+			);
 		});
 
 		it("should handle comparing same version", async () => {
@@ -135,7 +137,9 @@ describe("Utility Tools", () => {
 			const text = client.getTextContent(result);
 
 			// Should indicate versions are the same or show no differences
-			expect(text).toMatch(/same|identical|no changes|no differences|Comparison/i);
+			expect(text).toMatch(
+				/same|identical|no changes|no differences|Comparison/i,
+			);
 		});
 
 		it("should handle invalid version comparison", async () => {

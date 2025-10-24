@@ -19,7 +19,8 @@ const formatValidators = {
 		}
 	},
 	url: (val: string) => formatValidators.uri(val),
-	uuid: (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val),
+	uuid: (val: string) =>
+		/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val),
 	date: (val: string) => /^\d{4}-\d{2}-\d{2}$/.test(val),
 	"date-time": (val: string) => !isNaN(Date.parse(val)),
 	time: (val: string) => /^\d{2}:\d{2}:\d{2}/.test(val),
@@ -36,7 +37,9 @@ const formatValidators = {
 export function jsonSchemaToZod(schema: any): z.ZodTypeAny {
 	// Handle $ref (should be dereferenced already in most cases)
 	if (schema.$ref) {
-		throw new Error(`Unresolved $ref: ${schema.$ref}. Schema should be dereferenced first.`);
+		throw new Error(
+			`Unresolved $ref: ${schema.$ref}. Schema should be dereferenced first.`,
+		);
 	}
 
 	// Handle oneOf, anyOf, allOf
@@ -158,7 +161,9 @@ function createNumberSchema(schema: any, isInteger: boolean): z.ZodTypeAny {
 
 	// Handle enum
 	if (schema.enum) {
-		return z.enum(schema.enum.map(String) as [string, ...string[]]).transform(Number);
+		return z
+			.enum(schema.enum.map(String) as [string, ...string[]])
+			.transform(Number);
 	}
 
 	// Handle constraints

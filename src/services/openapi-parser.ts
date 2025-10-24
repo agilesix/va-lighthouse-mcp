@@ -4,7 +4,12 @@
 
 import { dereference } from "@scalar/openapi-parser";
 import type { OpenAPISpec, OperationObject } from "../types/va-api.js";
-import type { ApiSummary, EndpointInfo, EndpointDetails, SchemaInfo } from "../types/mcp-tools.js";
+import type {
+	ApiSummary,
+	EndpointInfo,
+	EndpointDetails,
+	SchemaInfo,
+} from "../types/mcp-tools.js";
 
 export class OpenAPIParser {
 	private spec: any;
@@ -39,7 +44,11 @@ export class OpenAPIParser {
 
 		for (const path in paths) {
 			for (const method in paths[path]) {
-				if (["get", "post", "put", "patch", "delete", "options", "head"].includes(method)) {
+				if (
+					["get", "post", "put", "patch", "delete", "options", "head"].includes(
+						method,
+					)
+				) {
 					totalEndpoints++;
 					const operation = paths[path][method];
 					const tags = operation.tags || ["untagged"];
@@ -103,7 +112,17 @@ export class OpenAPIParser {
 
 		for (const path in paths) {
 			for (const method in paths[path]) {
-				if (!["get", "post", "put", "patch", "delete", "options", "head"].includes(method)) {
+				if (
+					![
+						"get",
+						"post",
+						"put",
+						"patch",
+						"delete",
+						"options",
+						"head",
+					].includes(method)
+				) {
 					continue;
 				}
 
@@ -114,7 +133,10 @@ export class OpenAPIParser {
 					continue;
 				}
 
-				if (options?.method && method.toLowerCase() !== options.method.toLowerCase()) {
+				if (
+					options?.method &&
+					method.toLowerCase() !== options.method.toLowerCase()
+				) {
 					continue;
 				}
 
@@ -144,7 +166,10 @@ export class OpenAPIParser {
 	/**
 	 * Get detailed information for a specific endpoint
 	 */
-	async getEndpointDetails(path: string, method: string): Promise<EndpointDetails | null> {
+	async getEndpointDetails(
+		path: string,
+		method: string,
+	): Promise<EndpointDetails | null> {
 		await this.dereference();
 
 		const spec = this.dereferenced;
@@ -234,7 +259,9 @@ export class OpenAPIParser {
 				name,
 				type: schema.type,
 				description: schema.description,
-				properties: schema.properties ? Object.keys(schema.properties) : undefined,
+				properties: schema.properties
+					? Object.keys(schema.properties)
+					: undefined,
 				required: schema.required,
 				example: schema.example,
 			});
@@ -266,7 +293,17 @@ export class OpenAPIParser {
 
 		for (const path in paths) {
 			for (const method in paths[path]) {
-				if (!["get", "post", "put", "patch", "delete", "options", "head"].includes(method)) {
+				if (
+					![
+						"get",
+						"post",
+						"put",
+						"patch",
+						"delete",
+						"options",
+						"head",
+					].includes(method)
+				) {
 					continue;
 				}
 

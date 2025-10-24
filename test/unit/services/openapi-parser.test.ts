@@ -231,14 +231,19 @@ describe("OpenAPIParser", () => {
 			});
 
 			expect(endpoints).toHaveLength(2);
-			expect(endpoints.map((e) => e.operationId)).toEqual(["listUsers", "getUser"]);
+			expect(endpoints.map((e) => e.operationId)).toEqual([
+				"listUsers",
+				"getUser",
+			]);
 		});
 
 		it("should return method names in uppercase", async () => {
 			const parser = new OpenAPIParser(spec);
 			const endpoints = await parser.listEndpoints();
 
-			expect(endpoints.every((e) => e.method === e.method.toUpperCase())).toBe(true);
+			expect(endpoints.every((e) => e.method === e.method.toUpperCase())).toBe(
+				true,
+			);
 		});
 
 		it("should handle paths with no valid HTTP methods", async () => {
@@ -376,7 +381,10 @@ describe("OpenAPIParser", () => {
 			expect(details?.requestBody?.description).toBe("User data");
 			expect(details?.requestBody?.contentType).toBe("application/json");
 			expect(details?.requestBody?.schema).toBeDefined();
-			expect(details?.requestBody?.example).toEqual({ name: "John", email: "john@example.com" });
+			expect(details?.requestBody?.example).toEqual({
+				name: "John",
+				email: "john@example.com",
+			});
 		});
 
 		it("should return null for non-existent path", async () => {

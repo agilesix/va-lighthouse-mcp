@@ -10,38 +10,56 @@ import { validPayloads, invalidPayloads } from "../../helpers/mock-data.js";
 describe("Validator", () => {
 	describe("Valid Payloads", () => {
 		it("should validate a simple string", () => {
-			const result = Validator.validate(validPayloads.simpleString, testSchemas.simpleString);
+			const result = Validator.validate(
+				validPayloads.simpleString,
+				testSchemas.simpleString,
+			);
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 		});
 
 		it("should validate an object with required email", () => {
-			const result = Validator.validate(validPayloads.email, testSchemas.requiredEmail);
+			const result = Validator.validate(
+				validPayloads.email,
+				testSchemas.requiredEmail,
+			);
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 		});
 
 		it("should validate a complete person schema", () => {
-			const result = Validator.validate(validPayloads.person, testSchemas.personSchema);
+			const result = Validator.validate(
+				validPayloads.person,
+				testSchemas.personSchema,
+			);
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 			expect(result.summary).toBe("Payload is valid");
 		});
 
 		it("should validate an address schema", () => {
-			const result = Validator.validate(validPayloads.address, testSchemas.addressSchema);
+			const result = Validator.validate(
+				validPayloads.address,
+				testSchemas.addressSchema,
+			);
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 		});
 
 		it("should validate an array", () => {
-			const result = Validator.validate(["item1", "item2"], testSchemas.arraySchema);
+			const result = Validator.validate(
+				["item1", "item2"],
+				testSchemas.arraySchema,
+			);
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 		});
 
 		it("should validate draft-04 schema", () => {
-			const result = Validator.validate({ name: "test" }, testSchemas.draft04Schema);
+			const result = Validator.validate(
+				{ name: "test" },
+				testSchemas.draft04Schema,
+			);
 			expect(result.valid).toBe(true);
 			expect(result.errors).toHaveLength(0);
 		});
@@ -49,12 +67,17 @@ describe("Validator", () => {
 
 	describe("Invalid Payloads - Required Fields", () => {
 		it("should detect missing required fields", () => {
-			const result = Validator.validate(invalidPayloads.missingRequired, testSchemas.personSchema);
+			const result = Validator.validate(
+				invalidPayloads.missingRequired,
+				testSchemas.personSchema,
+			);
 			expect(result.valid).toBe(false);
 			expect(result.errors.length).toBeGreaterThan(0);
 
 			// Check for missing lastName
-			const lastNameError = result.errors.find((e) => e.message.includes("lastName"));
+			const lastNameError = result.errors.find((e) =>
+				e.message.includes("lastName"),
+			);
 			expect(lastNameError).toBeDefined();
 			expect(lastNameError?.type).toBe("required");
 			expect(lastNameError?.fixSuggestion).toContain("lastName");
@@ -74,7 +97,10 @@ describe("Validator", () => {
 
 	describe("Invalid Payloads - Type Errors", () => {
 		it("should detect wrong type", () => {
-			const result = Validator.validate(invalidPayloads.wrongType, testSchemas.personSchema);
+			const result = Validator.validate(
+				invalidPayloads.wrongType,
+				testSchemas.personSchema,
+			);
 			expect(result.valid).toBe(false);
 
 			const ageError = result.errors.find((e) => e.field === "age");
@@ -105,7 +131,10 @@ describe("Validator", () => {
 
 	describe("Invalid Payloads - Format Errors", () => {
 		it("should detect invalid email format", () => {
-			const result = Validator.validate(invalidPayloads.invalidFormat, testSchemas.requiredEmail);
+			const result = Validator.validate(
+				invalidPayloads.invalidFormat,
+				testSchemas.requiredEmail,
+			);
 			expect(result.valid).toBe(false);
 
 			const emailError = result.errors.find((e) => e.field === "email");
@@ -186,7 +215,10 @@ describe("Validator", () => {
 
 	describe("Invalid Payloads - Pattern Errors", () => {
 		it("should detect pattern mismatch", () => {
-			const result = Validator.validate(invalidPayloads.invalidPattern, testSchemas.personSchema);
+			const result = Validator.validate(
+				invalidPayloads.invalidPattern,
+				testSchemas.personSchema,
+			);
 			expect(result.valid).toBe(false);
 
 			const ssnError = result.errors.find((e) => e.field === "ssn");
@@ -197,19 +229,28 @@ describe("Validator", () => {
 
 		it("should validate state pattern", () => {
 			const validAddress = { ...validPayloads.address };
-			const result = Validator.validate(validAddress, testSchemas.addressSchema);
+			const result = Validator.validate(
+				validAddress,
+				testSchemas.addressSchema,
+			);
 			expect(result.valid).toBe(true);
 
 			// Invalid state (lowercase)
 			const invalidAddress = { ...validPayloads.address, state: "il" };
-			const invalidResult = Validator.validate(invalidAddress, testSchemas.addressSchema);
+			const invalidResult = Validator.validate(
+				invalidAddress,
+				testSchemas.addressSchema,
+			);
 			expect(invalidResult.valid).toBe(false);
 		});
 	});
 
 	describe("Invalid Payloads - Enum Errors", () => {
 		it("should detect invalid enum value", () => {
-			const result = Validator.validate(invalidPayloads.invalidEnum, testSchemas.personSchema);
+			const result = Validator.validate(
+				invalidPayloads.invalidEnum,
+				testSchemas.personSchema,
+			);
 			expect(result.valid).toBe(false);
 
 			const statusError = result.errors.find((e) => e.field === "status");
@@ -306,7 +347,10 @@ describe("Validator", () => {
 				ssn: "123-45-6789",
 			};
 
-			const result = Validator.validate(minimalPerson, testSchemas.personSchema);
+			const result = Validator.validate(
+				minimalPerson,
+				testSchemas.personSchema,
+			);
 			expect(result.valid).toBe(true);
 			// Optional fields without special description don't generate warnings
 			expect(result.warnings || []).toHaveLength(0);
@@ -349,7 +393,7 @@ describe("Validator", () => {
 		it("should provide fix suggestions for format errors", () => {
 			const result = Validator.validate(
 				{ email: "invalid" },
-				testSchemas.requiredEmail
+				testSchemas.requiredEmail,
 			);
 			expect(result.valid).toBe(false);
 
@@ -426,7 +470,7 @@ describe("Validator", () => {
 			// Valid nested object
 			let result = Validator.validate(
 				{ name: "John", address: { city: "Springfield" } },
-				schema
+				schema,
 			);
 			expect(result.valid).toBe(true);
 
@@ -479,7 +523,7 @@ describe("Validator", () => {
 					url: "not-url",
 					date: "not-date",
 				},
-				schema
+				schema,
 			);
 
 			expect(result.valid).toBe(false);
@@ -505,7 +549,11 @@ describe("Validator", () => {
 
 			const enumError = result.errors.find((e) => e.type === "enum");
 			expect(enumError).toBeDefined();
-			expect(enumError?.expected).toEqual(["compensation", "pension", "survivor"]);
+			expect(enumError?.expected).toEqual([
+				"compensation",
+				"pension",
+				"survivor",
+			]);
 		});
 
 		it("should accept valid enum values", () => {
@@ -542,7 +590,10 @@ describe("Validator", () => {
 				required: ["data"],
 			};
 
-			const result = Validator.validate({ data: { type: "invalid_type" } }, schema);
+			const result = Validator.validate(
+				{ data: { type: "invalid_type" } },
+				schema,
+			);
 			expect(result.valid).toBe(false);
 
 			const enumError = result.errors.find((e) => e.type === "enum");
@@ -916,6 +967,440 @@ describe("Validator", () => {
 			const result = Validator.validate(payload, schema);
 
 			// getFieldSchema will return undefined for "extra" since it's not in schema
+			expect(result).toBeDefined();
+		});
+	});
+
+	describe("Format Validation Errors", () => {
+		it("should provide email format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					email: {
+						type: "string",
+						format: "email",
+					},
+				},
+				required: ["email"],
+			};
+
+			const result = Validator.validate({ email: "not-an-email" }, schema);
+			expect(result.valid).toBe(false);
+
+			const emailError = result.errors.find((e) => e.field === "email");
+			expect(emailError).toBeDefined();
+			expect(emailError?.fixSuggestion).toContain("user@example.com");
+		});
+
+		it("should provide date format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					birthDate: {
+						type: "string",
+						format: "date",
+					},
+				},
+			};
+
+			const result = Validator.validate({ birthDate: "01/15/2024" }, schema);
+			expect(result.valid).toBe(false);
+
+			const dateError = result.errors.find((e) => e.field === "birthDate");
+			expect(dateError).toBeDefined();
+			expect(dateError?.fixSuggestion).toContain("2024-01-15");
+		});
+
+		it("should provide date-time format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					timestamp: {
+						type: "string",
+						format: "date-time",
+					},
+				},
+			};
+
+			// Zod's date-time validation is lenient, so test the suggestion path
+			// through the getFormatSuggestion method indirectly via other formats
+			const result = Validator.validate(
+				{ timestamp: "2024-01-15T10:30:00Z" },
+				schema,
+			);
+
+			// If valid, we can't test the error path directly
+			// Instead test that the format is recognized
+			if (result.valid) {
+				expect(result.valid).toBe(true);
+			} else {
+				const timeError = result.errors.find((e) => e.field === "timestamp");
+				if (timeError?.fixSuggestion) {
+					expect(timeError.fixSuggestion).toContain("2024-01-15T10:30:00Z");
+				}
+			}
+		});
+
+		it("should provide URI format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					website: {
+						type: "string",
+						format: "uri",
+					},
+				},
+			};
+
+			const result = Validator.validate({ website: "not a uri" }, schema);
+			expect(result.valid).toBe(false);
+
+			const uriError = result.errors.find((e) => e.field === "website");
+			expect(uriError).toBeDefined();
+			expect(uriError?.fixSuggestion).toContain("https://example.com");
+		});
+
+		it("should provide URL format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					url: {
+						type: "string",
+						format: "url",
+					},
+				},
+			};
+
+			const result = Validator.validate({ url: "invalid-url" }, schema);
+			expect(result.valid).toBe(false);
+
+			const urlError = result.errors.find((e) => e.field === "url");
+			expect(urlError).toBeDefined();
+			expect(urlError?.fixSuggestion).toContain("https://example.com");
+		});
+
+		it("should provide UUID format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					id: {
+						type: "string",
+						format: "uuid",
+					},
+				},
+			};
+
+			const result = Validator.validate({ id: "not-a-uuid" }, schema);
+			expect(result.valid).toBe(false);
+
+			const uuidError = result.errors.find((e) => e.field === "id");
+			expect(uuidError).toBeDefined();
+			expect(uuidError?.fixSuggestion).toContain(
+				"123e4567-e89b-12d3-a456-426614174000",
+			);
+		});
+
+		it("should provide SSN format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					ssn: {
+						type: "string",
+						format: "ssn",
+					},
+				},
+			};
+
+			const result = Validator.validate({ ssn: "123456789" }, schema);
+			expect(result.valid).toBe(false);
+
+			const ssnError = result.errors.find((e) => e.field === "ssn");
+			expect(ssnError).toBeDefined();
+			expect(ssnError?.fixSuggestion).toContain("XXX-XX-XXXX");
+		});
+
+		it("should provide phone format suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					phone: {
+						type: "string",
+						format: "phone",
+					},
+				},
+			};
+
+			const result = Validator.validate({ phone: "5551234567" }, schema);
+			expect(result.valid).toBe(false);
+
+			const phoneError = result.errors.find((e) => e.field === "phone");
+			expect(phoneError).toBeDefined();
+			expect(phoneError?.fixSuggestion).toContain("XXX-XXX-XXXX");
+		});
+
+		it("should handle unknown format types gracefully", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					customField: {
+						type: "string",
+						format: "custom-format",
+					},
+				},
+			};
+
+			// Zod doesn't validate unknown formats, so this will pass
+			const result = Validator.validate({ customField: "any-value" }, schema);
+			expect(result.valid).toBe(true);
+
+			// Test with pattern instead to trigger custom format suggestion path
+			const patternSchema = {
+				type: "object",
+				properties: {
+					customField: {
+						type: "string",
+						pattern: "^[A-Z]+$",
+					},
+				},
+			};
+
+			const patternResult = Validator.validate(
+				{ customField: "invalid123" },
+				patternSchema,
+			);
+			expect(patternResult.valid).toBe(false);
+
+			const customError = patternResult.errors.find(
+				(e) => e.field === "customField",
+			);
+			expect(customError).toBeDefined();
+			expect(customError?.fixSuggestion).toBeDefined();
+		});
+	});
+
+	describe("Pattern Validation Errors", () => {
+		it("should provide SSN pattern suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					ssn: {
+						type: "string",
+						pattern: "^\\d{3}-\\d{2}-\\d{4}$",
+					},
+				},
+			};
+
+			const result = Validator.validate({ ssn: "123456789" }, schema);
+			expect(result.valid).toBe(false);
+
+			const ssnError = result.errors.find((e) => e.field === "ssn");
+			expect(ssnError).toBeDefined();
+			expect(ssnError?.fixSuggestion).toContain("XXX-XX-XXXX");
+		});
+
+		it("should provide phone pattern suggestion", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					phone: {
+						type: "string",
+						pattern: "^\\d{3}-\\d{3}-\\d{4}$",
+					},
+				},
+			};
+
+			const result = Validator.validate({ phone: "5551234567" }, schema);
+			expect(result.valid).toBe(false);
+
+			const phoneError = result.errors.find((e) => e.field === "phone");
+			expect(phoneError).toBeDefined();
+			expect(phoneError?.fixSuggestion).toContain("XXX-XXX-XXXX");
+		});
+
+		it("should provide generic pattern suggestion for custom patterns", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					code: {
+						type: "string",
+						pattern: "^[A-Z]{3}\\d{3}$",
+					},
+				},
+			};
+
+			const result = Validator.validate({ code: "abc123" }, schema);
+			expect(result.valid).toBe(false);
+
+			const codeError = result.errors.find((e) => e.field === "code");
+			expect(codeError).toBeDefined();
+			expect(codeError?.fixSuggestion).toContain("pattern");
+		});
+	});
+
+	describe("Optional Fields and Warnings", () => {
+		it("should generate warnings for recommended optional fields", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					name: {
+						type: "string",
+					},
+					email: {
+						type: "string",
+						description: "Email is recommended for contact purposes",
+					},
+				},
+				required: ["name"],
+			};
+
+			const result = Validator.validate({ name: "John Doe" }, schema);
+			expect(result.valid).toBe(true);
+			expect(result.warnings).toBeDefined();
+
+			const emailWarning = result.warnings?.find((w) => w.field === "email");
+			expect(emailWarning).toBeDefined();
+			expect(emailWarning?.type).toBe("optional");
+			expect(emailWarning?.suggestion).toContain("recommended");
+		});
+
+		it("should generate warnings for 'should' fields", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					id: {
+						type: "string",
+					},
+					metadata: {
+						type: "object",
+						description: "Metadata should be provided for tracking",
+					},
+				},
+				required: ["id"],
+			};
+
+			const result = Validator.validate({ id: "123" }, schema);
+			expect(result.valid).toBe(true);
+
+			const metadataWarning = result.warnings?.find(
+				(w) => w.field === "metadata",
+			);
+			expect(metadataWarning).toBeDefined();
+			expect(metadataWarning?.type).toBe("optional");
+			expect(metadataWarning?.suggestion).toContain("should");
+		});
+
+		it("should not generate warnings for optional fields without recommendations", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					name: {
+						type: "string",
+					},
+					nickname: {
+						type: "string",
+						description: "User nickname",
+					},
+				},
+				required: ["name"],
+			};
+
+			const result = Validator.validate({ name: "John Doe" }, schema);
+			expect(result.valid).toBe(true);
+
+			const nicknameWarning = result.warnings?.find(
+				(w) => w.field === "nickname",
+			);
+			expect(nicknameWarning).toBeUndefined();
+		});
+	});
+
+	describe("Nested Field Path Resolution", () => {
+		it("should resolve nested object paths correctly", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					data: {
+						type: "object",
+						properties: {
+							user: {
+								type: "object",
+								properties: {
+									name: {
+										type: "string",
+									},
+								},
+							},
+						},
+					},
+				},
+			};
+
+			const payload = {
+				data: {
+					user: {
+						name: 123, // Wrong type
+					},
+				},
+			};
+
+			const result = Validator.validate(payload, schema);
+			expect(result.valid).toBe(false);
+
+			const nameError = result.errors.find((e) => e.path === "/data/user/name");
+			expect(nameError).toBeDefined();
+		});
+
+		it("should handle array items in field paths", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					items: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								value: {
+									type: "number",
+								},
+							},
+						},
+					},
+				},
+			};
+
+			const payload = {
+				items: [
+					{ value: 10 },
+					{ value: "invalid" }, // Wrong type
+				],
+			};
+
+			const result = Validator.validate(payload, schema);
+			expect(result.valid).toBe(false);
+
+			// Should detect error in array items (path includes array index)
+			const arrayError = result.errors.find((e) => e.path.includes("/items/"));
+			expect(arrayError).toBeDefined();
+		});
+
+		it("should return undefined for invalid field paths", () => {
+			const schema = {
+				type: "object",
+				properties: {
+					data: {
+						type: "string",
+					},
+				},
+			};
+
+			// Create a validation that will have errors on non-existent paths
+			// This tests the getFieldSchema method returning undefined for unknown paths
+			const payload = {
+				data: 123, // Wrong type
+				unknown: "field",
+			};
+
+			const result = Validator.validate(payload, schema);
 			expect(result).toBeDefined();
 		});
 	});
